@@ -1,0 +1,33 @@
+# Core backend
+fastapi
+uvicorn
+python-multipart
+pydantic>=2.5,<3
+
+# UI
+streamlit
+requests
+pandas
+rich
+
+# LangChain + LangGraph ecosystem
+langchain
+langchain-core
+langchain-community
+langchain-groq
+langgraph
+
+# Embeddings & vector search
+sentence-transformers
+faiss-cpu
+
+# File parsing
+pdfplumber
+python-docx
+
+# Environment variables
+python-dotenv
+reportlab
+gspread
+google-auth
+Markdown

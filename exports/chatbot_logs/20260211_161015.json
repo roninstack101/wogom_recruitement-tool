@@ -1,0 +1,23 @@
+{
+  "session_id": "20260211_161015",
+  "role": "Sales Trainer",
+  "created_at": "2026-02-11T16:13:45.645181",
+  "conversations": [
+    {
+      "turn": 1,
+      "timestamp": "2026-02-11T16:13:45.645212",
+      "user_instruction": "make it more concise",
+      "jd_before_length": 6022,
+      "jd_after_length": 1826,
+      "jd_after_snapshot": "# Sales Trainer\nLocation: Ahmedabad\nExperience: 5+ years\nType: Full Time\n\n## About Us\nWOGOM is a B2B Commerce and Retail Enablement Platform, empowering 6,000+ retailers and 450+ sellers across India.\n\n## Role Overview\nThe Sales Trainer role is for a seasoned sales professional with a passion for training and development. This role will ensure sales teams are equipped to pitch and sell our products, driving sales performance and growth.\n\n## Key Responsibilities\n• Design and deliver training programs for sales teams on company information, pitches, and products.\n• Develop gamification strategies to enhance training engagement and pitch retention.\n• Evaluate employee performance and provide feedback for continuous improvement.\n• Train sales teams and devise strategies for pitch retention.\n• Collaborate with cross-functional teams to align training programs with business objectives.\n\n## Requirements\n### Must-Have Skills\n• Sales training and development\n• Gamification and interactive learning\n• Sales expertise and knowledge of sales principles\n• Communication and interpersonal skills\n\n### Nice-to-Have Skills\n• Experience with training software and technologies\n\n## Who Will Succeed in This Role\nA results-driven and collaborative individual with a passion for training and development, strong interpersonal skills, and the ability to work with cross-functional teams.\n\n## Success Metrics\n• Within 30 days: comprehensive understanding of company products and sales strategies\n• Within 90 days: delivered initial training sessions with measurable improvements\n• Within 6 months: refined training program with significant and sustained sales performance improvements\n\n## How to Apply\nSubmit your application through our website, including your resume and a cover letter outlining your experience and qualifications."
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-02-11T16:14:18.471391",
+      "user_instruction": "keep it of 500 words",
+      "jd_before_length": 1826,
+      "jd_after_length": 1750,
+      "jd_after_snapshot": "# Sales Trainer\nLocation: Ahmedabad\nExperience: 5+ years\nType: Full Time\n\n## About Us\nWOGOM is a B2B Commerce and Retail Enablement Platform, empowering 6,000+ retailers and 450+ sellers across India.\n\n## Role Overview\nThe Sales Trainer role is for a seasoned sales professional with a passion for training and development, ensuring sales teams are equipped to pitch and sell our products, driving sales performance and growth.\n\n## Key Responsibilities\n• Design and deliver training programs for sales teams on company information, pitches, and products.\n• Develop gamification strategies to enhance training engagement and pitch retention.\n• Evaluate employee performance and provide feedback for continuous improvement.\n• Collaborate with cross-functional teams to align training programs with business objectives.\n\n## Requirements\n### Must-Have Skills\n• Sales training and development\n• Gamification and interactive learning\n• Sales expertise and knowledge of sales principles\n• Communication and interpersonal skills\n\n### Nice-to-Have Skills\n• Experience with training software and technologies\n\n## Who Will Succeed in This Role\nA results-driven and collaborative individual with a passion for training and development, strong interpersonal skills, and the ability to work with cross-functional teams.\n\n## Success Metrics\n• Within 30 days: comprehensive understanding of company products and sales strategies\n• Within 90 days: delivered initial training sessions with measurable improvements\n• Within 6 months: refined training program with significant and sustained sales performance improvements\n\n## How to Apply\nSubmit your application through our website, including your resume and a cover letter outlining your experience and qualifications."
+    }
+  ]
+}

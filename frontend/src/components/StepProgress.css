@@ -1,0 +1,82 @@
+/* ── Step Progress (CRM Compact) ── */
+
+.step-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xs);
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.step-line {
+    width: 32px;
+    height: 2px;
+    background: var(--slate-200);
+    margin: 0 4px;
+    border-radius: 1px;
+    transition: background var(--transition-base);
+}
+
+.step-line.done {
+    background: var(--accent-primary);
+}
+
+.step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    border: 2px solid var(--slate-200);
+    background: var(--bg-surface);
+    color: var(--slate-400);
+    transition: all var(--transition-base);
+    flex-shrink: 0;
+}
+
+.step-circle.active {
+    border-color: var(--accent-primary);
+    background: var(--indigo-50);
+    color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.step-circle.done {
+    border-color: var(--accent-primary);
+    background: var(--accent-primary);
+    color: white;
+}
+
+.step-label {
+    display: none;
+    font-size: 0.688rem;
+    font-weight: 500;
+    color: var(--slate-400);
+    margin-left: 6px;
+    white-space: nowrap;
+}
+
+.step-label.highlight {
+    color: var(--slate-700);
+    font-weight: 600;
+}
+
+/* Show labels on wider screens */
+@media (min-width: 640px) {
+    .step-label {
+        display: inline;
+    }
+}

@@ -1,0 +1,77 @@
+/* ── Dashboard Page ── */
+
+.dashboard {
+    max-width: 1200px;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 0.938rem;
+    font-weight: 700;
+    color: var(--slate-800);
+}
+
+/* Action tile arrow */
+.action-tile-arrow {
+    color: var(--slate-400);
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.action-tile:hover .action-tile-arrow {
+    transform: translateX(3px);
+    color: var(--accent-primary);
+}
+
+/* Pipeline Stages */
+.pipeline-stage {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+}
+
+.pipeline-stage-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-size: 0.813rem;
+    font-weight: 600;
+    color: var(--slate-700);
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--border-default);
+    border-left: 3px solid;
+}
+
+.pipeline-count {
+    margin-left: auto;
+    background: var(--slate-200);
+    color: var(--slate-600);
+    font-size: 0.688rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.pipeline-stage-body {
+    padding: 8px 12px;
+}
+
+.pipeline-item {
+    padding: 8px 8px;
+    font-size: 0.813rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.pipeline-item:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 1024px) {
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

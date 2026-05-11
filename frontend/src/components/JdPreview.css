@@ -1,0 +1,40 @@
+/* JD Preview */
+.jd-preview {
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.jd-preview h1,
+.jd-preview h2,
+.jd-preview h3 {
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.jd-preview h1 {
+    font-size: 1.15rem;
+}
+
+.jd-preview h2 {
+    font-size: 1rem;
+}
+
+.jd-preview h3 {
+    font-size: 0.938rem;
+}
+
+.jd-preview p {
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.jd-preview ul,
+.jd-preview ol {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.jd-preview li {
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}

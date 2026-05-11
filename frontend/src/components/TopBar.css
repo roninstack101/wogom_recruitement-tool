@@ -1,0 +1,238 @@
+/* ── TopBar ── */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 32px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-glass);
+}
+
+/* Left — Breadcrumbs */
+.topbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.topbar-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-root {
+    color: var(--slate-400);
+    font-weight: 600;
+}
+
+.breadcrumb-sep {
+    color: var(--slate-300);
+}
+
+.breadcrumb-current {
+    color: var(--slate-800);
+    font-weight: 700;
+}
+
+/* Right — Search, Notifications, Avatar */
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Icon button */
+.topbar-icon-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--slate-500);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.topbar-icon-btn:hover {
+    background: var(--slate-100);
+    color: var(--slate-800);
+}
+
+.topbar-notif-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--red-500);
+    border: 2px solid #fff;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+}
+
+/* Notification dropdown */
+.topbar-notif-wrapper {
+    position: relative;
+}
+
+.topbar-notif-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: -8px;
+    width: 360px;
+    max-height: 420px;
+    background: #fff;
+    border: 1px solid var(--slate-100);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 100;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notif-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--slate-100);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--slate-800);
+    background: var(--slate-50);
+}
+
+.notif-mark-all {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.notif-mark-all:hover {
+    text-decoration: underline;
+}
+
+.notif-list {
+    overflow-y: auto;
+    max-height: 320px;
+}
+
+.notif-item {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--slate-50);
+    transition: background 0.15s;
+    cursor: default;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item.unread {
+    background: #fdfcff;
+    border-left: 3px solid var(--accent-primary);
+}
+
+.notif-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--slate-700);
+    line-height: 1.5;
+}
+
+.notif-time {
+    font-size: 0.75rem;
+    color: var(--slate-400);
+    margin-top: 6px;
+    display: block;
+    font-weight: 500;
+}
+
+.notif-empty {
+    padding: 32px;
+    text-align: center;
+    color: var(--slate-400);
+    font-size: 0.9rem;
+}
+
+/* User info */
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: 8px;
+    padding-left: 12px;
+    border-left: 1px solid var(--slate-200);
+}
+
+.topbar-username {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--slate-700);
+}
+
+/* Logout */
+.logout-btn {
+    color: var(--slate-400);
+    width: 36px;
+    height: 36px;
+}
+
+.logout-btn:hover {
+    color: var(--red-500);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+/* Avatar */
+.topbar-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--indigo-500), var(--violet-500));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+    border: 2px solid #fff;
+}
+
+.avatar-initials {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+}

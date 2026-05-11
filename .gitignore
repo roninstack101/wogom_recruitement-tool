@@ -1,0 +1,54 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Virtual Environments ──
+venv/
+.venv/
+env/
+
+# ── Environment / Secrets ──
+.env
+.env.*
+.streamlit/.secrets
+.streamlit/secrets.toml
+
+# ── Scripts ──
+/scripts
+
+# ── IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Node / Frontend ──
+node_modules/
+frontend/dist/
+frontend/.cache/
+npm-debug.log*
+
+# ── Temp / Uploads ──
+*.tmp
+tmp/
+temp/
+uploads/
+
+# ── Caches / Testing ──
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Gemini / Agent ──
+.gemini/

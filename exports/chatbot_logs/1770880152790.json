@@ -1,0 +1,15 @@
+{
+  "session_id": "1770880152790",
+  "role": "Sales executive",
+  "created_at": "2026-02-12T12:41:04.642679",
+  "conversations": [
+    {
+      "turn": 1,
+      "timestamp": "2026-02-12T12:41:04.642697",
+      "user_instruction": "make it of 350 words, and remove how to apply and success metrics",
+      "jd_before_length": 6835,
+      "jd_after_length": 2387,
+      "jd_after_snapshot": "# Sales executive\nLocation: Ahmedabad, Gujarat, India\nExperience: Approximately 1–3\nType: Full-time\n\n## About Us\nWOGOM is a B2B Commerce and Retail Enablement Platform, empowering 6,000+ retailers and 450+ sellers across India with better Products, Pricing, Credit, and Growth Opportunities. Our goal is to build a connected ecosystem where technology, capital, and commerce converge to help Indian retailers scale with confidence.\n\n## Role Overview\nThe Sales Executive role is results-driven, requiring a strong background in customer relationship management and a proven track record of achieving sales targets. The ideal candidate will possess excellent communication skills, a target achievement mindset, and the ability to work independently with minimal oversight.\n\n## Key Responsibilities\n• Generate leads and convert prospects into customers through cold calls, emails, and meetings, building strong relationships and identifying new business opportunities.\n• Maintain and grow relationships with existing clients to ensure repeat business, by understanding customer needs and tailoring solutions.\n• Prepare and deliver presentations, proposals, and negotiated quotes to clients, showcasing the value of WOGOM's products and services.\n• Achieve monthly and quarterly sales targets by developing and executing sales plans that drive sales growth and expansion.\n• Track sales activities and update CRM with accurate customer and pipeline data.\n\n## Requirements\n### Must-Have Skills\n• Sales and negotiation skills to generate leads and convert prospects into customers.\n• Customer relationship management skills to understand customer needs and tailor solutions.\n• Target achievement mindset to set and achieve sales targets.\n• Excellent communication skills to prepare and deliver presentations, proposals, and negotiated quotes.\n• Ability to work independently and collaborate with marketing and product teams.\n\n### Nice-to-Have Skills\n• CRM usage (e.g., Salesforce, Zoho) to track sales activities and update CRM.\n• Basic MS Excel skills to analyze sales data and inform sales strategies.\n• Experience with sales and customer-facing business development.\n\n## Who Will Succeed in This Role\nThe ideal candidate will be results-driven, collaborative, and independent, with a strong background in customer relationship management and a proven track record of achieving sales targets."
+    }
+  ]
+}

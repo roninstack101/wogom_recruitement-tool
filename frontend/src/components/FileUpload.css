@@ -1,0 +1,104 @@
+/* ── File Upload (CRM Compact) ── */
+
+.file-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-upload-zone {
+    border: 1.5px dashed var(--slate-300);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: var(--slate-50);
+}
+
+.file-upload-zone:hover {
+    border-color: var(--indigo-400);
+    background: var(--indigo-50);
+}
+
+.file-upload-zone.drag-active {
+    border-color: var(--accent-primary);
+    background: var(--indigo-50);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.file-upload-zone.has-file {
+    border-style: solid;
+    border-color: var(--green-500);
+    background: var(--green-50);
+    cursor: default;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+/* Placeholder state */
+.file-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.upload-icon {
+    color: var(--slate-400);
+}
+
+.upload-text {
+    font-size: 0.813rem;
+    color: var(--slate-500);
+}
+
+.upload-link {
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.upload-hint {
+    font-size: 0.688rem;
+    color: var(--slate-400);
+}
+
+/* Selected file state */
+.file-selected {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.file-icon {
+    color: var(--green-600);
+}
+
+.file-name {
+    font-size: 0.813rem;
+    font-weight: 600;
+    color: var(--slate-700);
+    word-break: break-all;
+}
+
+.file-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: var(--red-50);
+    color: var(--red-500);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.file-remove:hover {
+    background: var(--red-500);
+    color: white;
+}

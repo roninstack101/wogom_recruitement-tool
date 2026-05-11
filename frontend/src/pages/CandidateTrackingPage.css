@@ -1,0 +1,444 @@
+/* ── Candidate Tracking Page ── */
+
+.ct-page {
+    padding: 24px 32px;
+    height: 100%;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.ct-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.ct-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0;
+}
+
+.ct-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 2px;
+}
+
+.ct-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.813rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: inherit;
+}
+
+.ct-btn.ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-default);
+}
+
+.ct-btn.ghost:hover {
+    color: var(--slate-800);
+    background: var(--slate-50);
+}
+
+/* ── Summary Cards ── */
+.ct-summary {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.ct-summary-card {
+    background: var(--bg-surface);
+    border: 2px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-fast);
+}
+
+.ct-summary-card:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.ct-summary-card.mini {
+    padding: 10px 14px;
+    gap: 8px;
+}
+
+.ct-summary-icon {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+.ct-summary-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    display: block;
+    line-height: 1.2;
+}
+
+.ct-summary-card.mini .ct-summary-value {
+    font-size: 1rem;
+}
+
+.ct-summary-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    display: block;
+}
+
+.ct-stage-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Error ── */
+.ct-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--red-50);
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-md);
+    color: #991b1b;
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+}
+
+.ct-error button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #991b1b;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* ── Toolbar ── */
+.ct-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.ct-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    flex: 1;
+    max-width: 400px;
+    transition: border-color var(--transition-fast);
+}
+
+.ct-search:focus-within {
+    border-color: var(--accent-primary);
+}
+
+.ct-search svg {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.ct-search input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    width: 100%;
+    font-family: inherit;
+}
+
+/* ── Loading / Empty ── */
+.ct-loading,
+.ct-empty {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-secondary);
+}
+
+.ct-empty svg {
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+
+.ct-empty-sub {
+    font-size: 0.813rem;
+    margin-top: 4px;
+    color: var(--slate-400);
+}
+
+/* ── Job Cards ── */
+.ct-job-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ct-job-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+    transition: all var(--transition-fast);
+}
+
+.ct-job-card:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--slate-300);
+}
+
+.ct-job-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.ct-job-info h4 {
+    font-size: 0.938rem;
+    font-weight: 600;
+    color: var(--slate-900);
+    margin: 0 0 4px;
+}
+
+.ct-job-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ct-badge {
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ct-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* ── Expanded Table ── */
+.ct-job-expanded {
+    padding: 0 20px 16px;
+    border-top: 1px solid var(--border-default);
+}
+
+.ct-no-cand {
+    color: var(--text-secondary);
+    font-size: 0.813rem;
+    font-style: italic;
+    padding: 12px 0;
+}
+
+.ct-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.813rem;
+    margin-top: 12px;
+}
+
+.ct-table th {
+    text-align: left;
+    padding: 10px 14px;
+    color: var(--slate-500);
+    font-weight: 600;
+    font-size: 0.69rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 2px solid var(--border-default);
+    background: var(--slate-50);
+}
+
+.ct-table td {
+    padding: 10px 14px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.ct-table tbody tr:hover td {
+    background: var(--slate-50);
+}
+
+.ct-name {
+    font-weight: 600;
+}
+
+.ct-stage-badge {
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.69rem;
+    font-weight: 600;
+}
+
+/* ── Active Filter ── */
+.ct-summary-card.active-filter {
+    border-width: 2px;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+/* ── Role Funnel ── */
+.ct-role-funnel {
+    margin: 16px 0;
+    background: var(--slate-50);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+
+.ct-role-funnel h5 {
+    font-size: 0.813rem;
+    font-weight: 700;
+    color: var(--slate-700);
+    margin: 0 0 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.ct-funnel-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ct-funnel-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ct-funnel-label {
+    width: 140px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+.ct-funnel-bar-wrap {
+    flex: 1;
+    height: 24px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-default);
+}
+
+.ct-funnel-bar {
+    height: 100%;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 28px;
+}
+
+.ct-funnel-count {
+    color: #fff;
+    font-size: 0.688rem;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Action Buttons ── */
+.ct-actions {
+    display: flex;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.ct-btn.download {
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3);
+}
+
+.ct-btn.download:hover:not(:disabled) {
+    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+}
+
+.ct-btn.evaluate {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(22, 163, 74, 0.3);
+}
+
+.ct-btn.evaluate:hover:not(:disabled) {
+    box-shadow: 0 2px 10px rgba(22, 163, 74, 0.35);
+}
+
+.ct-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .ct-summary {
+        flex-direction: column;
+    }
+
+    .ct-job-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .ct-toolbar {
+        flex-direction: column;
+    }
+
+    .ct-search {
+        max-width: 100%;
+    }
+
+    .ct-funnel-label {
+        width: 90px;
+        font-size: 0.65rem;
+    }
+
+    .ct-actions {
+        flex-direction: column;
+    }
+}

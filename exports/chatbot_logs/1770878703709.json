@@ -1,0 +1,15 @@
+{
+  "session_id": "1770878703709",
+  "role": "AI Engineer",
+  "created_at": "2026-02-12T12:16:41.707759",
+  "conversations": [
+    {
+      "turn": 1,
+      "timestamp": "2026-02-12T12:16:41.707775",
+      "user_instruction": "make it of 350 words",
+      "jd_before_length": 6065,
+      "jd_after_length": 2016,
+      "jd_after_snapshot": "# AI Engineer\n\n## About Us\nWOGOM is a B2B Commerce and Retail Enablement Platform, empowering 6,000+ retailers and 450+ sellers across India. Our goal is to build a connected ecosystem where technology, capital, and commerce converge to help Indian retailers scale with confidence.\n\n## Role Overview\nWe're seeking a skilled AI/ML professional with a strong foundation in machine learning and deep learning fundamentals, proficient in Python programming, and experienced in model deployment and real-world AI implementation. The ideal candidate will have a mindset of collaboration, with the ability to work with cross-functional teams to understand requirements and integrate AI models into production systems.\n\n## Key Responsibilities\n• Design, develop, and deploy AI/ML models for real business use cases, leveraging machine learning and deep learning fundamentals.\n• Work with structured and unstructured data to train and optimize models, and integrate AI models into production systems and internal tools.\n• Collaborate with product, engineering, and business teams to understand requirements and drive business outcomes.\n• Conduct thorough analysis of existing data infrastructure and monitor model performance.\n\n## Requirements\n### Must-Have Skills\n• Machine Learning & Deep Learning fundamentals\n• Python programming\n• Model deployment & real-world AI implementation\n• Data analysis and interpretation\n• Collaboration and communication\n\n### Nice-to-Have Skills\n• TensorFlow / PyTorch\n• SQL & Data Analysis\n• APIs & backend integration\n\n## Success Metrics\n• Conduct thorough analysis of existing data infrastructure within 30 days\n• Integrate AI models into production systems within 90 days\n• Achieve high code quality and drive business growth through AI-powered solutions within 6 months\n\n## How to Apply\nTo apply, please submit your resume and a cover letter explaining why you're a strong fit for this position. We look forward to hearing from you and exploring how you can contribute to WOGOM's mission."
+    }
+  ]
+}
