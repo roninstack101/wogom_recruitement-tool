@@ -147,7 +147,7 @@ export default function HRDashboardPage() {
                                 <Icon size={20} />
                             </div>
                             <div>
-                                <span className="hr-stat-value" style={{ color: s.color }}>{s.value}</span>
+                                <span className="hr-stat-value" style={{ color: s.color }}>{loading ? '—' : s.value}</span>
                                 <span className="hr-stat-label">{s.label}</span>
                             </div>
                         </div>
@@ -169,13 +169,13 @@ export default function HRDashboardPage() {
                     className={`hr-tab ${tab === 'incoming' ? 'active' : ''}`}
                     onClick={() => setTab('incoming')}
                 >
-                    <Inbox size={16} /> Incoming ({stats.pending})
+                    <Inbox size={16} /> Incoming ({loading ? '…' : stats.pending})
                 </button>
                 <button
                     className={`hr-tab ${tab === 'all' ? 'active' : ''}`}
                     onClick={() => setTab('all')}
                 >
-                    <Briefcase size={16} /> All Jobs ({stats.total})
+                    <Briefcase size={16} /> All Jobs ({loading ? '…' : stats.total})
                 </button>
                 <button
                     className={`hr-tab ${tab === 'analytics' ? 'active' : ''}`}
@@ -247,7 +247,8 @@ export default function HRDashboardPage() {
 
             {/* Job List View */}
             {tab !== 'analytics' && (
-                loading ? (
+                <div className="hr-content-area">
+                {loading ? (
                     <div className="hr-loading">Loading jobs...</div>
                 ) : displayJobs.length === 0 ? (
                     <div className="hr-empty">
@@ -431,7 +432,8 @@ export default function HRDashboardPage() {
                             );
                         })}
                     </div>
-                )
+                )}
+                </div>
             )}
         </div>
     );

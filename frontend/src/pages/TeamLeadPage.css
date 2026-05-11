@@ -3,7 +3,6 @@
 .tl-page {
     padding: 32px;
     height: 100%;
-    animation: fadeIn 0.4s ease-out;
 }
 
 .tl-header {
@@ -604,7 +603,7 @@
 /* ── Selected Form JD Preview ── */
 .tl-selected-preview {
     margin-top: 20px;
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.2s ease-out both;
 }
 
 .tl-selected-preview label {

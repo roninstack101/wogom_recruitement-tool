@@ -3,7 +3,6 @@
 .ct-page {
     padding: 24px 32px;
     height: 100%;
-    animation: fadeIn 0.4s ease-out;
 }
 
 .ct-header {

@@ -335,19 +335,29 @@ a:hover {
 
 /* ─── Animations ─── */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.25s ease-out both;
+}
+
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s;  }
+.delay-3 { animation-delay: 0.15s; }
+
 .page-enter {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeIn 0.25s ease-out both;
 }
 
 /* ─── Data Tables ─── */

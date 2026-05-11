@@ -3,7 +3,6 @@
 .recruiter-page {
     padding: 24px;
     height: 100%;
-    animation: fadeIn 0.4s ease-out;
 }
 
 .recruiter-header {
@@ -293,13 +292,13 @@
 }
 
 .custom-role-input {
-    animation: fadeIn 0.3s ease;
+    animation: revealDown 0.2s ease-out both;
 }
 
-@keyframes fadeIn {
+@keyframes revealDown {
     from {
         opacity: 0;
-        transform: translateY(-5px);
+        transform: translateY(-4px);
     }
 
     to {
@@ -373,7 +372,7 @@
    ══════════════════════════════════════ */
 
 .saved-forms-section {
-    animation: fadeIn 0.3s ease;
+    animation: revealDown 0.2s ease-out both;
 }
 
 .empty-state {
@@ -531,7 +530,7 @@
    ══════════════════════════════════════ */
 
 .manual-form {
-    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: revealDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
     max-width: 800px;
     margin: 0 auto;
 }
