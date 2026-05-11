@@ -14,6 +14,7 @@ from app.api.job_requests import router as jobs_router
 from app.api.notifications import router as notif_router
 from app.api.analytics import router as analytics_router
 from app.utils.scheduler import start_scheduler, shutdown_scheduler, reschedule_active_jobs
+from app.utils.llm import get_usage, reset_usage
 
 
 @asynccontextmanager
@@ -42,6 +43,17 @@ app.add_middleware(
 @app.get("/")
 def health():
     return {"status": "Backend running"}
+
+
+@app.get("/admin/token-usage")
+def token_usage():
+    return get_usage()
+
+
+@app.post("/admin/token-usage/reset")
+def token_usage_reset():
+    reset_usage()
+    return {"status": "reset"}
 
 
 app.include_router(auth_router)

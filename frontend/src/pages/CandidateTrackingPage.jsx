@@ -215,7 +215,7 @@ export default function CandidateTrackingPage() {
                                         <div className="ct-actions">
                                             <button
                                                 className="ct-btn evaluate"
-                                                onClick={() => navigate('/candidate', { state: { generatedProfile: job.generated_profile, jdText: job.jd_text, roleTitle: job.role_title } })}
+                                                onClick={() => navigate('/candidate', { state: { generatedProfile: job.generated_profile, jdText: job.jd_text, roleTitle: job.role_title, jobId: job.job_id } })}
                                             >
                                                 <Eye size={14} /> Evaluate CVs
                                             </button>

@@ -45,6 +45,33 @@ class _KeyManager:
 
 _key_manager = _KeyManager()
 
+# Session-wide token counter — resets on server restart
+_usage = {"input": 0, "output": 0, "calls": 0, "retries": 0}
+_usage_lock = threading.Lock()
+
+COST_PER_M_INPUT  = 0.59   # USD per 1M input tokens  (Groq LLaMA 3.3-70b)
+COST_PER_M_OUTPUT = 0.79   # USD per 1M output tokens
+
+
+def get_usage() -> dict:
+    with _usage_lock:
+        inp  = _usage["input"]
+        out  = _usage["output"]
+        cost = (inp * COST_PER_M_INPUT + out * COST_PER_M_OUTPUT) / 1_000_000
+        return {
+            "calls":               _usage["calls"],
+            "retries":             _usage["retries"],
+            "input_tokens":        inp,
+            "output_tokens":       out,
+            "total_tokens":        inp + out,
+            "estimated_cost_usd":  round(cost, 6),
+        }
+
+
+def reset_usage() -> None:
+    with _usage_lock:
+        _usage.update({"input": 0, "output": 0, "calls": 0, "retries": 0})
+
 
 def get_llm() -> ChatGroq:
     return ChatGroq(
@@ -72,9 +99,18 @@ def invoke_llm(prompt: str):
             finish_reason = response.response_metadata.get("finish_reason", "stop")
             if finish_reason == "length":
                 new_key = _key_manager.rotate()
+                with _usage_lock:
+                    _usage["retries"] += 1
                 print(f"[LLM] Response truncated (finish_reason=length) — rotated to key ...{new_key[-6:]} (attempt {attempt + 1})")
                 time.sleep(RETRY_DELAY)
                 continue
+
+            # Record token usage from the successful response
+            meta = response.response_metadata.get("token_usage", {})
+            with _usage_lock:
+                _usage["input"]  += meta.get("prompt_tokens", 0)
+                _usage["output"] += meta.get("completion_tokens", 0)
+                _usage["calls"]  += 1
 
             return response
 
@@ -85,6 +121,8 @@ def invoke_llm(prompt: str):
 
             if is_rate_limit:
                 new_key = _key_manager.rotate()
+                with _usage_lock:
+                    _usage["retries"] += 1
                 print(f"[LLM] Rate limit hit — rotated to key ...{new_key[-6:]} (attempt {attempt + 1})")
                 time.sleep(RETRY_DELAY)
                 last_error = e

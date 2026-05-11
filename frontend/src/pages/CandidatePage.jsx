@@ -42,11 +42,14 @@ export default function CandidatePage() {
     const [profileJson, setProfileJson] = useState('');
     const [profile, setProfile] = useState(null);
 
+    // Job ID for DB persistence
+    const [jobId, setJobId] = useState('');
+
     // Auto-fill from navigation state (e.g. from Candidate Tracking)
     useEffect(() => {
         const state = location.state;
+        if (state?.jobId) setJobId(String(state.jobId));
         if (state?.generatedProfile) {
-            // Use the AI-generated job profile
             const profileData = typeof state.generatedProfile === 'string'
                 ? state.generatedProfile
                 : JSON.stringify(state.generatedProfile, null, 2);
@@ -77,8 +80,9 @@ export default function CandidatePage() {
     const [resumeFile, setResumeFile] = useState(null);
     const [evaluations, setEvaluations] = useState([]);
 
-    // Final ranking
+    // Final ranking + DB summary
     const [ranking, setRanking] = useState(null);
+    const [dbSummary, setDbSummary] = useState(null);
 
     // Expanded row tracking
     const [expandedRow, setExpandedRow] = useState(null);
@@ -119,16 +123,18 @@ export default function CandidatePage() {
     // ─── Step 3: Evaluate CVs ───
     const handleEvaluate = async () => {
         if (!resumeFile) return;
+        if (!jobId || isNaN(Number(jobId))) {
+            setError('Please enter a valid Job ID to save results.');
+            return;
+        }
         setLoading(true);
         setError('');
         try {
-            const evalData = await api.evaluateCVs(resumeFile, personas);
-            if (evalData.error) throw new Error(evalData.error);
-            setEvaluations(evalData.evaluations || []);
-
-            // Auto-rank
-            const rankData = await api.rankCandidates(evalData.evaluations || []);
-            setRanking(rankData);
+            const data = await api.runFullCVPipeline(resumeFile, profile, Number(jobId));
+            if (data.error) throw new Error(data.error);
+            setEvaluations(data.evaluations || []);
+            setRanking(data.ranking);
+            setDbSummary(data.db_summary || null);
             setStep('results');
         } catch (err) {
             setError(err.message || 'CV evaluation failed.');
@@ -315,6 +321,21 @@ export default function CandidatePage() {
                     </p>
 
                     <div style={{ maxWidth: 400 }}>
+                        <label className="text-sm font-semibold mb-xs" style={{ display: 'block' }}>
+                            Job ID <span style={{ color: 'var(--red-500)' }}>*</span>
+                        </label>
+                        <input
+                            type="number"
+                            className="input"
+                            placeholder="e.g. 3"
+                            value={jobId}
+                            onChange={e => setJobId(e.target.value)}
+                            style={{ marginBottom: '1rem' }}
+                            id="job-id-input"
+                        />
+                    </div>
+
+                    <div style={{ maxWidth: 400 }}>
                         <FileUpload
                             label="Resumes (ZIP, PDF, DOCX)"
                             accept=".zip,.pdf,.docx"
@@ -381,6 +402,14 @@ export default function CandidatePage() {
                             </div>
                         </div>
                     </div>
+
+                    {/* DB save confirmation */}
+                    {dbSummary && (
+                        <div className="alert alert-success mb-md animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <CheckCircle size={16} />
+                            {dbSummary.candidates_saved} candidate(s) saved to Job #{dbSummary.job_id}
+                        </div>
+                    )}
 
                     {/* Ranking Table */}
                     <div className="toolbar">

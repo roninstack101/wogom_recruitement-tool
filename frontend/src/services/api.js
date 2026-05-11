@@ -324,10 +324,11 @@ export async function rankCandidates(evaluations, topN = 10) {
     });
 }
 
-export async function runFullCVPipeline(resumeFile, profile, topN = 10) {
+export async function runFullCVPipeline(resumeFile, profile, jobId, topN = 10) {
     const formData = new FormData();
     formData.append('resumes', resumeFile);
     formData.append('profile', JSON.stringify(profile));
+    formData.append('job_id', jobId.toString());
     formData.append('top_n', topN.toString());
 
     const res = await authFetch('/cv/full', {
