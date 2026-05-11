@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
 from fastapi import APIRouter, Depends, UploadFile, File, Form
+from typing import Optional
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
 
@@ -311,7 +312,7 @@ def rank_evaluated_candidates(payload: dict):
 async def full_cv_pipeline(
     resumes: UploadFile = File(...),
     profile: str = Form(...),
-    job_id: int = Form(...),
+    job_id: Optional[int] = Form(None),
     top_n: int = Form(10),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -360,8 +361,11 @@ async def full_cv_pipeline(
     # Step 5 — Rank (no LLM)
     ranking = rank_candidates(evaluations, top_n=top_n)
 
-    # Step 6 — Persist everything to DB
-    saved = _save_to_db(db, job_id, profile_dict, personas, evaluations, raw_text_map)
+    # Step 6 — Persist to DB only if job_id provided
+    db_summary = None
+    if job_id is not None:
+        saved = _save_to_db(db, job_id, profile_dict, personas, evaluations, raw_text_map)
+        db_summary = {"job_id": job_id, "candidates_saved": saved}
 
     return {
         "personas": personas,
@@ -373,8 +377,5 @@ async def full_cv_pipeline(
             "rejected": len(rejected),
             "threshold": SIMILARITY_THRESHOLD,
         },
-        "db_summary": {
-            "job_id": job_id,
-            "candidates_saved": saved,
-        },
+        "db_summary": db_summary,
     }

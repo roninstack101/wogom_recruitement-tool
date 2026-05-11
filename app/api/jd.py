@@ -9,6 +9,7 @@ from app.agents.profile_builder import build_profile
 from app.agents.role_suggester import suggest_roles
 from app.db.database import get_db
 from app.db.models import JDFormData
+from app.utils.llm import invoke_llm
 import json
 
 router = APIRouter(
@@ -122,6 +123,53 @@ def get_roles(db: Session = Depends(get_db)):
     """Return saved forms as roles (backward compat)."""
     rows = db.query(JDFormData).order_by(JDFormData.created_at.desc()).all()
     return [_form_row_to_dict(r) for r in rows]
+
+@router.post("/quick-profile")
+def quick_profile_api(payload: dict):
+    """Convert plain text role description → structured candidate profile (1 LLM call)."""
+    description = payload.get("description", "").strip()
+    if not description:
+        return {"error": "Missing 'description'"}
+
+    prompt = f"""You are a senior HR strategist.
+
+Convert the following role description into a structured Ideal Candidate Profile JSON.
+
+ROLE DESCRIPTION:
+{description}
+
+OUTPUT FORMAT (STRICT JSON ONLY):
+{{
+  "role": "extracted or inferred role title",
+  "department": "inferred department",
+  "profile_summary": "2–3 sentence paragraph describing the ideal candidate",
+  "core_competencies": ["Competency 1", "Competency 2", "Competency 3"],
+  "behavioral_traits": ["Trait 1", "Trait 2"],
+  "success_metrics": ["30-day goal", "90-day goal", "6-month goal"],
+  "team_context": "1–2 sentences about team and working environment",
+  "key_responsibilities_refined": ["Responsibility 1", "Responsibility 2"],
+  "must_have_skills_refined": ["Skill 1", "Skill 2", "Skill 3"],
+  "nice_to_have_skills": ["Skill 1", "Skill 2"]
+}}
+
+RULES:
+- Output ONLY valid JSON. No markdown, no explanations.
+- Infer missing details from context where reasonable.
+- Keep it practical and specific to the role described.
+"""
+    try:
+        response = invoke_llm(prompt)
+        content = response.content.strip()
+        if content.startswith("```"):
+            content = content.split("```")[1]
+            if content.startswith("json"):
+                content = content[4:]
+            content = content.strip()
+        profile = json.loads(content)
+        return {"profile": profile}
+    except Exception as e:
+        return {"error": f"Profile generation failed: {e}"}
+
 
 @router.post("/clarify")
 def clarify_jd_api(payload: dict):

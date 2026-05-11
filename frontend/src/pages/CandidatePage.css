@@ -16,6 +16,37 @@
     gap: 8px;
 }
 
+/* ── Profile Mode Toggle ── */
+.cv-mode-toggle {
+    display: flex;
+    gap: 8px;
+    background: var(--slate-100);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    width: fit-content;
+}
+
+.cv-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    border-radius: calc(var(--radius-md) - 2px);
+    cursor: pointer;
+    background: transparent;
+    color: var(--slate-500);
+    transition: all var(--transition-fast);
+}
+
+.cv-mode-btn.active {
+    background: white;
+    color: var(--accent-primary);
+    box-shadow: var(--shadow-sm);
+}
+
 /* ── Stepper ── */
 .cv-stepper {
     display: flex;

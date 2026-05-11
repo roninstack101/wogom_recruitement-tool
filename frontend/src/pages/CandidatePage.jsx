@@ -41,6 +41,8 @@ export default function CandidatePage() {
     // Profile state
     const [profileJson, setProfileJson] = useState('');
     const [profile, setProfile] = useState(null);
+    const [profileMode, setProfileMode] = useState('describe'); // 'describe' | 'paste'
+    const [description, setDescription] = useState('');
 
     // Job ID for DB persistence
     const [jobId, setJobId] = useState('');
@@ -88,21 +90,39 @@ export default function CandidatePage() {
     const [expandedRow, setExpandedRow] = useState(null);
 
     // ─── Step 1: Parse profile ───
-    const handleProfileSubmit = () => {
+    const handleProfileSubmit = async () => {
         setError('');
-        const trimmed = profileJson.trim();
-        if (!trimmed) {
-            setError('Please enter a role description.');
-            return;
+
+        if (profileMode === 'describe') {
+            if (!description.trim()) {
+                setError('Please describe the role.');
+                return;
+            }
+            setLoading(true);
+            try {
+                const data = await api.quickGenerateProfile(description.trim());
+                if (data.error) throw new Error(data.error);
+                setProfile(data.profile);
+                setProfileJson(JSON.stringify(data.profile, null, 2));
+                setStep('personas');
+            } catch (err) {
+                setError(err.message || 'Failed to generate profile.');
+            }
+            setLoading(false);
+        } else {
+            const trimmed = profileJson.trim();
+            if (!trimmed) {
+                setError('Please paste a profile JSON.');
+                return;
+            }
+            try {
+                setProfile(JSON.parse(trimmed));
+            } catch {
+                setError('Invalid JSON. Please paste a valid profile from Agent 2.');
+                return;
+            }
+            setStep('personas');
         }
-        // Try JSON first, fall back to plain string
-        try {
-            const parsed = JSON.parse(trimmed);
-            setProfile(parsed);
-        } catch {
-            setProfile(trimmed);
-        }
-        setStep('personas');
     };
 
     // ─── Step 2: Generate personas ───
@@ -123,14 +143,11 @@ export default function CandidatePage() {
     // ─── Step 3: Evaluate CVs ───
     const handleEvaluate = async () => {
         if (!resumeFile) return;
-        if (!jobId || isNaN(Number(jobId))) {
-            setError('Please enter a valid Job ID to save results.');
-            return;
-        }
         setLoading(true);
         setError('');
         try {
-            const data = await api.runFullCVPipeline(resumeFile, profile, Number(jobId));
+            const parsedJobId = jobId && !isNaN(Number(jobId)) ? Number(jobId) : null;
+            const data = await api.runFullCVPipeline(resumeFile, profile, parsedJobId);
             if (data.error) throw new Error(data.error);
             setEvaluations(data.evaluations || []);
             setRanking(data.ranking);
@@ -193,28 +210,67 @@ export default function CandidatePage() {
             {step === 'profile' && (
                 <div className="card animate-fade-in-up delay-2">
                     <h3 className="section-heading">
-                        <Target size={16} /> Describe the Role
+                        <Target size={16} /> Role Profile
                     </h3>
-                    <p className="text-sm text-muted mb-md">
-                        Describe the role in plain text, or paste the profile JSON from Agent 2.
-                        This will be used to generate ideal candidate personas.
-                    </p>
-                    <textarea
-                        className="cv-textarea"
-                        rows={12}
-                        placeholder={'e.g. We are looking for a Backend Engineer with 3-5 years of experience in Python, FastAPI, and PostgreSQL. The role requires strong system design skills, experience with microservices, and the ability to mentor junior developers...'}
-                        value={profileJson}
-                        onChange={e => setProfileJson(e.target.value)}
-                        id="profile-input"
-                    />
+
+                    {/* Mode toggle */}
+                    <div className="cv-mode-toggle mb-md">
+                        <button
+                            className={`cv-mode-btn ${profileMode === 'describe' ? 'active' : ''}`}
+                            onClick={() => setProfileMode('describe')}
+                        >
+                            <Sparkles size={14} /> JD / Description
+                        </button>
+                        <button
+                            className={`cv-mode-btn ${profileMode === 'paste' ? 'active' : ''}`}
+                            onClick={() => setProfileMode('paste')}
+                        >
+                            <FileText size={14} /> Profile JSON
+                        </button>
+                    </div>
+
+                    {profileMode === 'describe' ? (
+                        <>
+                            <p className="text-sm text-muted mb-md">
+                                Paste an existing Job Description or describe the role in plain text — the AI will convert it into a structured profile automatically.
+                            </p>
+                            <textarea
+                                className="cv-textarea"
+                                rows={10}
+                                placeholder="Paste a full Job Description or write a short description e.g. 'We need a Backend Engineer with 3–5 years in Python, FastAPI, PostgreSQL...'"
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
+                                id="description-input"
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <p className="text-sm text-muted mb-md">
+                                Paste the profile JSON generated by Agent 2 (Profile Builder).
+                            </p>
+                            <textarea
+                                className="cv-textarea"
+                                rows={12}
+                                placeholder='{ "role": "Backend Engineer", "must_have_skills_refined": [...], ... }'
+                                value={profileJson}
+                                onChange={e => setProfileJson(e.target.value)}
+                                id="profile-input"
+                            />
+                        </>
+                    )}
+
                     <div className="mt-md">
                         <button
                             className="btn btn-primary"
-                            disabled={!profileJson.trim()}
+                            disabled={loading || (profileMode === 'describe' ? !description.trim() : !profileJson.trim())}
                             onClick={handleProfileSubmit}
                             id="submit-profile-btn"
                         >
-                            <ChevronRight size={16} /> Continue to Personas
+                            {loading ? (
+                                <><div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Generating Profile…</>
+                            ) : (
+                                <><ChevronRight size={16} /> Continue to Personas</>
+                            )}
                         </button>
                     </div>
                 </div>
@@ -322,12 +378,12 @@ export default function CandidatePage() {
 
                     <div style={{ maxWidth: 400 }}>
                         <label className="text-sm font-semibold mb-xs" style={{ display: 'block' }}>
-                            Job ID <span style={{ color: 'var(--red-500)' }}>*</span>
+                            Job ID <span style={{ color: 'var(--slate-400)', fontWeight: 400 }}>(optional — leave blank to evaluate without saving)</span>
                         </label>
                         <input
                             type="number"
                             className="input"
-                            placeholder="e.g. 3"
+                            placeholder="e.g. 3 — or leave blank for quick evaluation"
                             value={jobId}
                             onChange={e => setJobId(e.target.value)}
                             style={{ marginBottom: '1rem' }}
