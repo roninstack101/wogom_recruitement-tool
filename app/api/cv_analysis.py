@@ -5,10 +5,12 @@ import os
 import re
 import shutil
 import tempfile
+import threading
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import numpy as np
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi import APIRouter, Depends, UploadFile, File, Form, BackgroundTasks
 from typing import Optional
 from sentence_transformers import SentenceTransformer
 from sqlalchemy.orm import Session
@@ -17,9 +19,9 @@ from app.agents.persona_builder import build_personas
 from app.agents.cv_evaluator import evaluate_candidate
 from app.agents.candidate_ranker import rank_candidates
 from app.agents.resume_parser import _extract_resumes_from_files
-from app.utils.resume_skills import extract_skills_llm, extract_section, extract_location
+from app.utils.resume_skills import extract_section, extract_location
 from app.api.auth import get_current_user
-from app.db.database import get_db
+from app.db.database import get_db, SessionLocal
 from app.db.models import (
     User, JobRequest, JobProfile, Persona,
     Candidate, CandidateEvaluation, PipelineStageLog,
@@ -31,6 +33,19 @@ router = APIRouter()
 _embedder = SentenceTransformer("all-MiniLM-L6-v2")
 SIMILARITY_THRESHOLD = 0.30
 MAX_EVAL_WORKERS = 5
+
+# ─────────────────────────────────────────────
+# In-memory async job store
+# ─────────────────────────────────────────────
+_eval_jobs: dict = {}
+_eval_jobs_lock = threading.Lock()
+
+
+def _set_job(job_id: str, **kwargs):
+    with _eval_jobs_lock:
+        if job_id not in _eval_jobs:
+            _eval_jobs[job_id] = {}
+        _eval_jobs[job_id].update(kwargs)
 
 
 # ─────────────────────────────────────────────
@@ -57,13 +72,33 @@ def _parse_resume(r: dict) -> dict:
     return {
         "candidate_id": r["file"],
         "summary": extract_section(text, ["summary", "profile", "about", "objective"]),
-        "skills": extract_skills_llm(resume_text=text),
+        "skills": {},
         "experience": extract_section(text, ["experience", "work history", "employment"]),
         "projects": extract_section(text, ["projects", "key projects"]),
         "raw_text": text,
         "resume_path": r["path"],
         "location": extract_location(text),
     }
+
+
+def _parse_resumes_parallel(raw_resumes: list) -> list:
+    results = [None] * len(raw_resumes)
+    with ThreadPoolExecutor(max_workers=MAX_EVAL_WORKERS) as executor:
+        futures = {executor.submit(_parse_resume, r): i for i, r in enumerate(raw_resumes)}
+        for future in as_completed(futures):
+            idx = futures[future]
+            try:
+                results[idx] = future.result()
+            except Exception as e:
+                r = raw_resumes[idx]
+                print(f"[CV_ANALYSIS] Parse failed: {r.get('file')} — {e}")
+                results[idx] = {
+                    "candidate_id": r["file"],
+                    "summary": "", "skills": {}, "experience": "",
+                    "projects": "", "raw_text": r.get("text", ""),
+                    "resume_path": r.get("path", ""), "location": "",
+                }
+    return [r for r in results if r is not None]
 
 
 def _evaluate_parallel(parsed_resumes: list, personas: list) -> list:
@@ -335,8 +370,8 @@ async def full_cv_pipeline(
         if not raw_resumes:
             return {"error": "No valid resumes found", "personas": personas, "evaluations": [], "shortlist": []}
 
-        # Step 2 — Parse resumes (1 LLM call per resume for skill extraction)
-        parsed_resumes = [_parse_resume(r) for r in raw_resumes]
+        # Step 2 — Parse resumes in parallel
+        parsed_resumes = _parse_resumes_parallel(raw_resumes)
 
         # Build raw_text map for DB saving (covers all CVs including rejected)
         raw_text_map = {r["candidate_id"]: r["raw_text"] for r in parsed_resumes}
@@ -385,3 +420,131 @@ async def full_cv_pipeline(
         },
         "db_summary": db_summary,
     }
+
+
+# ─────────────────────────────────────────────
+# Background pipeline runner
+# ─────────────────────────────────────────────
+
+def _run_pipeline_background(eval_job_id: str, tmp_path: str, profile_str: str, db_job_id, top_n: int):
+    db = SessionLocal()
+    try:
+        _set_job(eval_job_id, message="Building candidate personas…")
+        profile_dict = json.loads(profile_str)
+        personas = build_personas(profile_dict)
+
+        _set_job(eval_job_id, message="Extracting resumes from file…")
+        raw_resumes = _extract_resumes_from_files([tmp_path])
+        if not raw_resumes:
+            _set_job(eval_job_id, status="failed", error="No valid resumes found in the uploaded file.")
+            return
+
+        total = len(raw_resumes)
+        _set_job(eval_job_id, message=f"Parsing {total} resumes…")
+        parsed_resumes = _parse_resumes_parallel(raw_resumes)
+        raw_text_map = {r["candidate_id"]: r["raw_text"] for r in parsed_resumes}
+
+        _set_job(eval_job_id, message=f"Pre-filtering {total} resumes with embeddings…")
+        qualified, rejected = _prefilter(parsed_resumes, profile_dict, SIMILARITY_THRESHOLD)
+
+        _set_job(eval_job_id, message=f"Evaluating {len(qualified)} qualified candidates with AI… (this takes a while)")
+        evaluations = _evaluate_parallel(qualified, personas)
+
+        location_map = {r["candidate_id"]: r.get("location", "") for r in parsed_resumes}
+        for ev in evaluations:
+            ev["location"] = location_map.get(ev["candidate_id"], "")
+
+        for r in rejected:
+            evaluations.append({
+                "candidate_id": r["candidate_id"],
+                "location": location_map.get(r["candidate_id"], ""),
+                "persona_results": [],
+                "overall_score": 0,
+                "overall_grade": "F",
+                "best_fit_persona": "N/A",
+                "best_fit_persona_name": "Pre-filtered (low relevance)",
+                "summary": f"Similarity score {r.get('similarity_score', 0):.2f} below threshold {SIMILARITY_THRESHOLD}.",
+            })
+
+        _set_job(eval_job_id, message="Ranking candidates…")
+        ranking = rank_candidates(evaluations, top_n=top_n)
+
+        db_summary = None
+        if db_job_id is not None:
+            _set_job(eval_job_id, message="Saving results to database…")
+            saved = _save_to_db(db, db_job_id, profile_dict, personas, evaluations, raw_text_map)
+            db_summary = {"job_id": db_job_id, "candidates_saved": saved}
+
+        _set_job(eval_job_id,
+            status="complete",
+            message=f"Done! {len(qualified)} of {total} candidates evaluated.",
+            result={
+                "personas": personas,
+                "evaluations": evaluations,
+                "ranking": ranking,
+                "pre_filter_summary": {
+                    "total_uploaded": total,
+                    "passed_filter": len(qualified),
+                    "rejected": len(rejected),
+                    "threshold": SIMILARITY_THRESHOLD,
+                },
+                "db_summary": db_summary,
+            },
+        )
+
+    except Exception as e:
+        print(f"[CV_ASYNC] Job {eval_job_id} failed: {e}")
+        _set_job(eval_job_id, status="failed", error=str(e))
+    finally:
+        db.close()
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
+# ─────────────────────────────────────────────
+# POST /full-async  — start background job
+# ─────────────────────────────────────────────
+
+@router.post("/full-async")
+async def full_cv_pipeline_async(
+    resumes: UploadFile = File(...),
+    profile: str = Form(...),
+    job_id: Optional[int] = Form(None),
+    top_n: int = Form(10),
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        json.loads(profile)
+    except json.JSONDecodeError:
+        return {"error": "Invalid JSON in 'profile' field"}
+
+    eval_job_id = str(uuid.uuid4())
+    suffix = os.path.splitext(resumes.filename or "upload.zip")[1] or ".zip"
+    tmp_path = os.path.join(tempfile.gettempdir(), f"cv_upload_{eval_job_id}{suffix}")
+
+    with open(tmp_path, "wb") as f:
+        shutil.copyfileobj(resumes.file, f)
+
+    _set_job(eval_job_id, status="processing", message="Job queued…", result=None, error=None)
+
+    thread = threading.Thread(
+        target=_run_pipeline_background,
+        args=(eval_job_id, tmp_path, profile, job_id, top_n),
+        daemon=True,
+    )
+    thread.start()
+
+    return {"job_id": eval_job_id}
+
+
+# ─────────────────────────────────────────────
+# GET /job/{eval_job_id}  — poll job status
+# ─────────────────────────────────────────────
+
+@router.get("/job/{eval_job_id}")
+def get_cv_job_status(eval_job_id: str):
+    with _eval_jobs_lock:
+        job = dict(_eval_jobs.get(eval_job_id, {}))
+    if not job:
+        return {"status": "not_found", "message": "Job not found — server may have restarted."}
+    return job

@@ -142,22 +142,54 @@ export default function CandidatePage() {
     };
 
     // ─── Step 3: Evaluate CVs ───
+    const [progressMsg, setProgressMsg] = useState('');
+
     const handleEvaluate = async () => {
         if (!resumeFile) return;
         setLoading(true);
         setError('');
+        setProgressMsg('Uploading resumes…');
         try {
             const parsedJobId = jobId && !isNaN(Number(jobId)) ? Number(jobId) : null;
-            const data = await api.runFullCVPipeline(resumeFile, profile, parsedJobId);
+            const data = await api.startCVPipeline(resumeFile, profile, parsedJobId);
             if (data.error) throw new Error(data.error);
-            setEvaluations(data.evaluations || []);
-            setRanking(data.ranking);
-            setDbSummary(data.db_summary || null);
-            setStep('results');
+
+            const evalJobId = data.job_id;
+            setProgressMsg('Processing started…');
+
+            await new Promise((resolve, reject) => {
+                const interval = setInterval(async () => {
+                    try {
+                        const status = await api.getCVJobStatus(evalJobId);
+                        setProgressMsg(status.message || 'Processing…');
+
+                        if (status.status === 'complete') {
+                            clearInterval(interval);
+                            const result = status.result;
+                            setEvaluations(result.evaluations || []);
+                            setRanking(result.ranking);
+                            setDbSummary(result.db_summary || null);
+                            setStep('results');
+                            resolve();
+                        } else if (status.status === 'failed') {
+                            clearInterval(interval);
+                            reject(new Error(status.error || 'Evaluation failed.'));
+                        } else if (status.status === 'not_found') {
+                            clearInterval(interval);
+                            reject(new Error('Job lost — server may have restarted. Please try again.'));
+                        }
+                    } catch (pollErr) {
+                        clearInterval(interval);
+                        reject(pollErr);
+                    }
+                }, 5000);
+            });
+
         } catch (err) {
             setError(err.message || 'CV evaluation failed.');
         }
         setLoading(false);
+        setProgressMsg('');
     };
 
     const handleDownloadExcel = () => {
@@ -444,8 +476,8 @@ export default function CandidatePage() {
 
                     {loading && (
                         <div className="cv-progress-msg mt-md">
-                            <BarChart3 size={16} />
-                            This may take a few minutes depending on the number of resumes…
+                            <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2, flexShrink: 0 }} />
+                            {progressMsg || 'Processing…'}
                         </div>
                     )}
                 </div>
