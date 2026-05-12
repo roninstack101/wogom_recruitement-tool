@@ -3,8 +3,9 @@ import { useLocation } from 'react-router-dom';
 import {
     Upload, Rocket, Trophy, Search, Filter, Users,
     Brain, Target, ChevronRight, Star, AlertTriangle,
-    CheckCircle, BarChart3, Sparkles, FileText
+    CheckCircle, BarChart3, Sparkles, FileText, Download, MapPin
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import FileUpload from '../components/FileUpload';
 import * as api from '../services/api';
 import './CandidatePage.css';
@@ -157,6 +158,27 @@ export default function CandidatePage() {
             setError(err.message || 'CV evaluation failed.');
         }
         setLoading(false);
+    };
+
+    const handleDownloadExcel = () => {
+        if (!ranking?.shortlist?.length) return;
+        const rows = ranking.shortlist.map(row => ({
+            Rank: row.rank,
+            Candidate: row.candidate_id,
+            Location: row.location || '—',
+            'Best Persona': row.persona_name || row.persona,
+            Score: row.score,
+            Grade: row.grade,
+            Summary: row.why || '',
+        }));
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws['!cols'] = [
+            { wch: 6 }, { wch: 30 }, { wch: 25 }, { wch: 25 },
+            { wch: 8 }, { wch: 8 }, { wch: 60 },
+        ];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Candidates');
+        XLSX.writeFile(wb, `candidate_results_${Date.now()}.xlsx`);
     };
 
     const currentStepIdx = STEPS.findIndex(s => s.id === step);
@@ -476,6 +498,9 @@ export default function CandidatePage() {
                                 {ranking.shortlist?.length || 0} results
                             </span>
                         </div>
+                        <button className="btn btn-secondary" onClick={handleDownloadExcel}>
+                            <Download size={15} /> Download Excel
+                        </button>
                     </div>
 
                     {ranking.shortlist && ranking.shortlist.length > 0 ? (
@@ -486,6 +511,7 @@ export default function CandidatePage() {
                                     <tr>
                                         <th>Rank</th>
                                         <th>Candidate</th>
+                                        <th>Location</th>
                                         <th>Best Persona</th>
                                         <th>Score</th>
                                         <th>Grade</th>
@@ -508,6 +534,13 @@ export default function CandidatePage() {
                                                 </td>
                                                 <td className="font-semibold">
                                                     {row.candidate_id}
+                                                </td>
+                                                <td className="text-sm" style={{ color: 'var(--slate-500)' }}>
+                                                    {row.location ? (
+                                                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                            <MapPin size={12} /> {row.location}
+                                                        </span>
+                                                    ) : '—'}
                                                 </td>
                                                 <td>
                                                     <span className="badge badge-accent">
@@ -542,7 +575,7 @@ export default function CandidatePage() {
                                             {/* Expanded persona breakdown */}
                                             {expandedRow === i && row.persona_results && (
                                                 <tr key={`detail-${i}`} className="detail-row">
-                                                    <td colSpan={6}>
+                                                    <td colSpan={7}>
                                                         <div className="persona-breakdown">
                                                             <h4>Persona Breakdown</h4>
                                                             <div className="breakdown-grid">

@@ -51,6 +51,7 @@ def rank_candidates(evaluations: List[dict], top_n: int = 10) -> dict:
         shortlisted.append({
             "rank": len(shortlisted) + 1,
             "candidate_id": candidate["candidate_id"],
+            "location": candidate.get("location", ""),
             "persona": persona,
             "persona_name": candidate.get("best_fit_persona_name", persona),
             "score": candidate["overall_score"],
