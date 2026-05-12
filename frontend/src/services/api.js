@@ -299,7 +299,7 @@ export async function runPipeline(formData) {
 // ── CV Analysis Pipeline ──
 
 export async function quickGenerateProfile(description) {
-    return request('/jd/quick-profile', {
+    return request('/jd/jd/quick-profile', {
         method: 'POST',
         body: JSON.stringify({ description }),
     });

@@ -52,3 +52,8 @@ uploads/
 
 # ── Gemini / Agent ──
 .gemini/
+
+# ── Generated / Local DB ──
+exports/
+recruitment.db
+frontend/.vite/
