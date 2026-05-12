@@ -10,7 +10,7 @@ load_dotenv()
 GROQ_MODEL   = "llama-3.3-70b-versatile"
 GEMINI_MODEL = "gemini-2.5-flash"
 MAX_RETRIES  = 3
-RETRY_DELAY  = 15
+RETRY_DELAY  = 5
 
 COST_PER_M = {
     "groq_input":    0.59,
@@ -139,8 +139,7 @@ def invoke_llm(prompt: str):
             is_rate_limit = any(x in err for x in [
                 "rate limit", "429", "too many requests", "tokens per",
                 "quota", "resource exhausted", "not_found", "no longer available",
-                "model_not_found", "404", "503", "unavailable", "overloaded",
-                "high demand", "try again",
+                "model_not_found", "404",
             ])
 
             if is_rate_limit:

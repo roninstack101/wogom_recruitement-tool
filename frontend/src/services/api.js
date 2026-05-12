@@ -331,24 +331,6 @@ export async function rankCandidates(evaluations, topN = 10) {
     });
 }
 
-export async function startCVPipeline(resumeFile, profile, jobId = null, topN = 10) {
-    const formData = new FormData();
-    formData.append('resumes', resumeFile);
-    formData.append('profile', JSON.stringify(profile));
-    if (jobId !== null) formData.append('job_id', jobId.toString());
-    formData.append('top_n', topN.toString());
-
-    const res = await authFetch('/cv/full-async', {
-        method: 'POST',
-        body: formData,
-    });
-    return res.json();
-}
-
-export async function getCVJobStatus(evalJobId) {
-    return request(`/cv/job/${evalJobId}`);
-}
-
 export async function runFullCVPipeline(resumeFile, profile, jobId = null, topN = 10) {
     const formData = new FormData();
     formData.append('resumes', resumeFile);
