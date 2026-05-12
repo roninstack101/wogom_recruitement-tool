@@ -104,6 +104,7 @@ def invoke_llm(prompt: str):
         provider, key = _manager.current
         try:
             llm = get_llm()
+            print(f"[LLM] Using {provider} key ...{key[-6:]} (attempt {attempt + 1})")
             response = llm.invoke(prompt)
 
             # Detect truncated response

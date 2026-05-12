@@ -14,7 +14,7 @@ from app.api.job_requests import router as jobs_router
 from app.api.notifications import router as notif_router
 from app.api.analytics import router as analytics_router
 from app.utils.scheduler import start_scheduler, shutdown_scheduler, reschedule_active_jobs
-from app.utils.llm import get_usage, reset_usage
+from app.utils.llm import get_usage, reset_usage, _manager, GROQ_MODEL, GEMINI_MODEL
 
 
 @asynccontextmanager
@@ -54,6 +54,17 @@ def token_usage():
 def token_usage_reset():
     reset_usage()
     return {"status": "reset"}
+
+
+@app.get("/admin/llm-status")
+def llm_status():
+    provider, key = _manager.current
+    return {
+        "active_provider": provider,
+        "active_key_suffix": f"...{key[-6:]}",
+        "model": GROQ_MODEL if provider == "groq" else GEMINI_MODEL,
+        "total_providers": _manager.count,
+    }
 
 
 app.include_router(auth_router)
