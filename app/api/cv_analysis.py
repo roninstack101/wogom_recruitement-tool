@@ -32,7 +32,7 @@ router = APIRouter()
 
 _embedder = SentenceTransformer("all-MiniLM-L6-v2")
 SIMILARITY_THRESHOLD = 0.30
-MAX_EVAL_WORKERS = 5
+MAX_EVAL_WORKERS = 2
 
 # ─────────────────────────────────────────────
 # In-memory async job store
@@ -72,7 +72,7 @@ def _parse_resume(r: dict) -> dict:
     return {
         "candidate_id": r["file"],
         "summary": extract_section(text, ["summary", "profile", "about", "objective"]),
-        "skills": extract_skills_llm(resume_text=text),
+        "skills": {},
         "experience": extract_section(text, ["experience", "work history", "employment"]),
         "projects": extract_section(text, ["projects", "key projects"]),
         "raw_text": text,
