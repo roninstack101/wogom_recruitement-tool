@@ -139,7 +139,7 @@ def invoke_llm(prompt: str):
             is_rate_limit = any(x in err for x in [
                 "rate limit", "429", "too many requests", "tokens per",
                 "quota", "resource exhausted", "not_found", "no longer available",
-                "model_not_found", "404",
+                "model_not_found", "404", "503", "unavailable",
             ])
 
             if is_rate_limit:
