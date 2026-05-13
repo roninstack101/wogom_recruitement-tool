@@ -382,12 +382,8 @@ async def full_cv_pipeline(
         # Step 4 — Parallel LLM evaluation (1 call per qualified CV)
         evaluations = _evaluate_parallel(qualified, personas)
 
-    # Merge location from parsed resumes into evaluations
+    # Append rejected with score 0 (use regex location as fallback)
     location_map = {r["candidate_id"]: r.get("location", "") for r in parsed_resumes}
-    for ev in evaluations:
-        ev["location"] = location_map.get(ev["candidate_id"], "")
-
-    # Append rejected with score 0
     for r in rejected:
         evaluations.append({
             "candidate_id": r["candidate_id"],
@@ -400,7 +396,7 @@ async def full_cv_pipeline(
         })
 
     # Step 5 — Rank (no LLM)
-    ranking = rank_candidates(evaluations, top_n=top_n)
+    ranking = rank_candidates(evaluations, top_n=len(evaluations))
 
     # Step 6 — Persist to DB only if job_id provided
     db_summary = None
@@ -451,9 +447,6 @@ def _run_pipeline_background(eval_job_id: str, tmp_path: str, profile_str: str, 
         evaluations = _evaluate_parallel(qualified, personas)
 
         location_map = {r["candidate_id"]: r.get("location", "") for r in parsed_resumes}
-        for ev in evaluations:
-            ev["location"] = location_map.get(ev["candidate_id"], "")
-
         for r in rejected:
             evaluations.append({
                 "candidate_id": r["candidate_id"],
@@ -467,7 +460,7 @@ def _run_pipeline_background(eval_job_id: str, tmp_path: str, profile_str: str, 
             })
 
         _set_job(eval_job_id, message="Ranking candidates…")
-        ranking = rank_candidates(evaluations, top_n=top_n)
+        ranking = rank_candidates(evaluations, top_n=len(evaluations))
 
         db_summary = None
         if db_job_id is not None:

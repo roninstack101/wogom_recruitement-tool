@@ -90,6 +90,9 @@ export default function CandidatePage() {
     // Expanded row tracking
     const [expandedRow, setExpandedRow] = useState(null);
 
+    // Location filter
+    const [locationFilter, setLocationFilter] = useState('All');
+
     // ─── Step 1: Parse profile ───
     const handleProfileSubmit = async () => {
         setError('');
@@ -194,7 +197,10 @@ export default function CandidatePage() {
 
     const handleDownloadExcel = () => {
         if (!ranking?.shortlist?.length) return;
-        const rows = ranking.shortlist.map(row => ({
+        const visible = locationFilter === 'All'
+            ? ranking.shortlist
+            : ranking.shortlist.filter(r => r.location === locationFilter);
+        const rows = visible.map(row => ({
             Rank: row.rank,
             Candidate: row.candidate_id,
             Location: row.location || '—',
@@ -525,14 +531,33 @@ export default function CandidatePage() {
                     <div className="toolbar">
                         <div className="flex items-center gap-sm">
                             <Trophy size={18} className="trophy-icon" />
-                            <h2>Top Candidates</h2>
+                            <h2>Candidates</h2>
                             <span className="badge badge-info">
-                                {ranking.shortlist?.length || 0} results
+                                {locationFilter === 'All'
+                                    ? ranking.shortlist?.length || 0
+                                    : ranking.shortlist?.filter(r => r.location === locationFilter).length || 0
+                                } results
                             </span>
                         </div>
-                        <button className="btn btn-secondary" onClick={handleDownloadExcel}>
-                            <Download size={15} /> Download Excel
-                        </button>
+                        <div className="flex items-center gap-sm">
+                            <div className="flex items-center gap-sm">
+                                <MapPin size={14} style={{ color: 'var(--slate-400)' }} />
+                                <select
+                                    className="input"
+                                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem', minWidth: 160 }}
+                                    value={locationFilter}
+                                    onChange={e => setLocationFilter(e.target.value)}
+                                >
+                                    <option value="All">All Locations</option>
+                                    {[...new Set(ranking.shortlist?.map(r => r.location).filter(Boolean))].sort().map(loc => (
+                                        <option key={loc} value={loc}>{loc}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button className="btn btn-secondary" onClick={handleDownloadExcel}>
+                                <Download size={15} /> Download Excel
+                            </button>
+                        </div>
                     </div>
 
                     {ranking.shortlist && ranking.shortlist.length > 0 ? (
@@ -551,7 +576,10 @@ export default function CandidatePage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {ranking.shortlist.map((row, i) => (
+                                    {(locationFilter === 'All'
+                                        ? ranking.shortlist
+                                        : ranking.shortlist.filter(r => r.location === locationFilter)
+                                    ).map((row, i) => (
                                         <>
                                             <tr
                                                 key={`row-${i}`}

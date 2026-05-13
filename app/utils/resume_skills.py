@@ -67,27 +67,36 @@ def extract_location(text: str) -> str:
     """Extract candidate location from resume text using regex — no LLM call."""
     import re
     lines = text.splitlines()
+    skip = {'university', 'college', 'institute', 'company', 'corporation', 'ltd', 'inc', 'pvt', 'school'}
 
-    # Pass 1: explicit label in first 30 lines
+    # Pass 1: explicit label anywhere in first 30 lines
     label_re = re.compile(
-        r'(?:location|address|city|based\s+in|residing\s+in)[:\s]+(.+)',
+        r'(?:location|address|city|based\s+in|residing\s+in)[:\s]+([^\n|•]+)',
         re.IGNORECASE,
     )
     for line in lines[:30]:
         m = label_re.search(line.strip())
         if m:
-            val = m.group(1).strip().rstrip('|•–-').strip()
+            val = m.group(1).strip().rstrip('|•–-,').strip()
             if val and len(val) < 80:
                 return val
 
-    # Pass 2: "City, State" or "City, Country" pattern in first 20 lines
-    city_re = re.compile(r'^([A-Za-z][A-Za-z\s\-]{1,30}),\s*([A-Za-z][A-Za-z\s\-]{1,30})$')
-    skip = {'university', 'college', 'institute', 'company', 'corporation', 'ltd', 'inc', 'pvt'}
-    for line in lines[:20]:
+    # Pass 2: "City, State/Country" pattern anywhere within a line (handles pipe-separated headers)
+    city_re = re.compile(r'([A-Za-z][A-Za-z\s\-]{1,25}),\s*([A-Za-z][A-Za-z\s\-]{1,25})')
+    for line in lines[:25]:
         line = line.strip()
-        m = city_re.match(line)
-        if m and not any(w in line.lower() for w in skip):
-            return line
+        if not line or any(w in line.lower() for w in skip):
+            continue
+        # Split on common separators to isolate segments
+        segments = re.split(r'[|•\-–/]', line)
+        for seg in segments:
+            seg = seg.strip()
+            m = city_re.fullmatch(seg) or city_re.match(seg)
+            if m:
+                # Reject if segment looks like a name or email
+                if '@' in seg or re.search(r'\d', seg):
+                    continue
+                return seg.strip()
 
     # Pass 3: look for "Remote" anywhere in first 30 lines
     for line in lines[:30]:

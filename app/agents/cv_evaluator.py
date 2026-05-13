@@ -31,26 +31,29 @@ PERSONAS:
 {personas}
 ─────────────────────────────
 
-OUTPUT FORMAT (STRICT JSON ARRAY — one object per persona, same order as input):
-[
-  {{
-    "persona_id": "<id from input>",
-    "score": <integer 0–100>,
-    "grade": "<A+ / A / A- / B+ / B / B- / C+ / C / C- / D / F>",
-    "strengths": ["Strength 1", "Strength 2"],
-    "gaps": ["Gap 1", "Gap 2"],
-    "explanation": "2–3 sentence summary of the fit"
-  }}
-]
+OUTPUT FORMAT (STRICT JSON OBJECT):
+{{
+  "location": "<city, state/country extracted from CV — empty string if not found>",
+  "results": [
+    {{
+      "persona_id": "<id from input>",
+      "score": <integer 0–100>,
+      "grade": "<A+ / A / A- / B+ / B / B- / C+ / C / C- / D / F>",
+      "strengths": ["Strength 1", "Strength 2"],
+      "gaps": ["Gap 1", "Gap 2"],
+      "explanation": "2–3 sentence summary of the fit"
+    }}
+  ]
+}}
 
 RULES:
 - Be strict but fair. Do not inflate scores.
 - Cite specific evidence from the CV.
-- Output ONLY a valid JSON array. No markdown, no extra text.
+- Output ONLY a valid JSON object. No markdown, no extra text.
 """
 
 
-def _parse_llm_json(content) -> list:
+def _parse_llm_json(content) -> dict:
     if isinstance(content, list):
         content = "\n".join(
             part.get("text", str(part)) if isinstance(part, dict) else str(part)
@@ -62,7 +65,11 @@ def _parse_llm_json(content) -> list:
         if content.startswith("json"):
             content = content[4:]
         content = content.strip()
-    return json.loads(content)
+    parsed = json.loads(content)
+    # Support legacy plain array response
+    if isinstance(parsed, list):
+        return {"location": "", "results": parsed}
+    return parsed
 
 
 def _compute_grade(score: int) -> str:
@@ -112,9 +119,12 @@ def evaluate_candidate(cv: dict, personas: list) -> dict:
         personas=json.dumps(personas, indent=2),
     )
 
+    llm_location = ""
     try:
         response = invoke_llm(prompt)
-        persona_results = _parse_llm_json(response.content)
+        parsed = _parse_llm_json(response.content)
+        llm_location = parsed.get("location", "")
+        persona_results = parsed.get("results", [])
 
         for i, result in enumerate(persona_results):
             if i < len(personas):
@@ -130,6 +140,7 @@ def evaluate_candidate(cv: dict, personas: list) -> dict:
 
     return {
         "candidate_id": cv.get("candidate_id", "unknown"),
+        "location": llm_location or cv.get("location", ""),
         "persona_results": persona_results,
         "overall_score": avg_score,
         "overall_grade": _compute_grade(avg_score),
