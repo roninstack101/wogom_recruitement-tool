@@ -91,9 +91,18 @@ export default function CandidatePage() {
     const [expandedRow, setExpandedRow] = useState(null);
 
     // Location filter + sorting
-    const [locationFilter, setLocationFilter] = useState('All');
+    const [locationFilter, setLocationFilter] = useState('');
     const [sortBy, setSortBy] = useState('score');
     const [sortDir, setSortDir] = useState('desc');
+
+    const toggleSort = (col) => {
+        if (sortBy === col) {
+            setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(col);
+            setSortDir(col === 'score' ? 'desc' : 'asc');
+        }
+    };
 
     // ─── Step 1: Parse profile ───
     const handleProfileSubmit = async () => {
@@ -199,9 +208,9 @@ export default function CandidatePage() {
 
     const handleDownloadExcel = () => {
         if (!ranking?.shortlist?.length) return;
-        const visible = locationFilter === 'All'
-            ? ranking.shortlist
-            : ranking.shortlist.filter(r => r.location === locationFilter);
+        const visible = locationFilter.trim()
+            ? ranking.shortlist.filter(r => r.location?.toLowerCase().includes(locationFilter.toLowerCase()))
+            : ranking.shortlist;
         const rows = visible.map(row => ({
             Rank: row.rank,
             Candidate: row.candidate_id,
@@ -535,26 +544,22 @@ export default function CandidatePage() {
                             <Trophy size={18} className="trophy-icon" />
                             <h2>Candidates</h2>
                             <span className="badge badge-info">
-                                {locationFilter === 'All'
-                                    ? ranking.shortlist?.length || 0
-                                    : ranking.shortlist?.filter(r => r.location === locationFilter).length || 0
+                                {locationFilter.trim()
+                                    ? ranking.shortlist?.filter(r => r.location?.toLowerCase().includes(locationFilter.toLowerCase())).length || 0
+                                    : ranking.shortlist?.length || 0
                                 } results
                             </span>
                         </div>
                         <div className="flex items-center gap-sm">
                             <div className="flex items-center gap-sm">
                                 <MapPin size={14} style={{ color: 'var(--slate-400)' }} />
-                                <select
+                                <input
                                     className="input"
-                                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem', minWidth: 160 }}
+                                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.85rem', width: 180 }}
+                                    placeholder="Filter by location…"
                                     value={locationFilter}
                                     onChange={e => setLocationFilter(e.target.value)}
-                                >
-                                    <option value="All">All Locations</option>
-                                    {[...new Set(ranking.shortlist?.map(r => r.location).filter(Boolean))].sort().map(loc => (
-                                        <option key={loc} value={loc}>{loc}</option>
-                                    ))}
-                                </select>
+                                />
                             </div>
                             <button className="btn btn-secondary" onClick={handleDownloadExcel}>
                                 <Download size={15} /> Download Excel
@@ -570,17 +575,11 @@ export default function CandidatePage() {
                                     <tr>
                                         <th>Rank</th>
                                         <th>Candidate</th>
-                                        <th
-                                            style={{ cursor: 'pointer', userSelect: 'none' }}
-                                            onClick={() => { setSortBy('location'); setSortDir(s => sortBy === 'location' ? (s === 'asc' ? 'desc' : 'asc') : 'asc'); }}
-                                        >
+                                        <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('location')}>
                                             Location {sortBy === 'location' ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
                                         </th>
                                         <th>Best Persona</th>
-                                        <th
-                                            style={{ cursor: 'pointer', userSelect: 'none' }}
-                                            onClick={() => { setSortBy('score'); setSortDir(s => sortBy === 'score' ? (s === 'asc' ? 'desc' : 'asc') : 'desc'); }}
-                                        >
+                                        <th style={{ cursor: 'pointer', userSelect: 'none' }} onClick={() => toggleSort('score')}>
                                             Score {sortBy === 'score' ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
                                         </th>
                                         <th>Grade</th>
@@ -588,9 +587,9 @@ export default function CandidatePage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {(locationFilter === 'All'
-                                        ? ranking.shortlist
-                                        : ranking.shortlist.filter(r => r.location === locationFilter)
+                                    {(locationFilter.trim()
+                                        ? ranking.shortlist.filter(r => r.location?.toLowerCase().includes(locationFilter.toLowerCase()))
+                                        : ranking.shortlist
                                     ).slice().sort((a, b) => {
                                         if (sortBy === 'score') {
                                             return sortDir === 'asc' ? a.score - b.score : b.score - a.score;

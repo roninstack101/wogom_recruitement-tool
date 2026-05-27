@@ -33,7 +33,7 @@ PERSONAS:
 
 OUTPUT FORMAT (STRICT JSON OBJECT):
 {{
-  "location": "<candidate's current city and state/country e.g. 'Mumbai, Maharashtra' or 'Ahmedabad, Gujarat' — look in the header/contact section only, NOT skills or experience — empty string if not found>",
+  "location": "<physical city and state/country where candidate lives e.g. 'Mumbai, Maharashtra'. Must be a real geographic place — NOT a technology, skill, framework, or company name. Look ONLY at the contact/address line at the top of the CV. If no city/address is clearly visible, return empty string ''>",
   "results": [
     {{
       "persona_id": "<id from input>",
