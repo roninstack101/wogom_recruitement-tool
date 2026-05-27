@@ -2,7 +2,38 @@
 # Agent 7: CV Evaluator — optimized batch version
 
 import json
+import re
 from app.utils.llm import invoke_llm
+
+_LOCATION_RE = re.compile(
+    r'^[A-Za-z][A-Za-z\s\-\.]{1,40}(?:,\s*[A-Za-z][A-Za-z\s\-\.]{1,40})?$'
+)
+_GARBAGE_WORDS = {
+    'spring', 'boot', 'react', 'node', 'python', 'java', 'javascript',
+    'microservices', 'rest', 'api', 'apis', 'sql', 'nosql', 'docker',
+    'kubernetes', 'aws', 'azure', 'gcp', 'git', 'linux', 'html', 'css',
+    'angular', 'vue', 'flask', 'django', 'express', 'mongodb', 'postgres',
+    'mysql', 'redis', 'kafka', 'jenkins', 'devops', 'agile', 'scrum',
+}
+
+def _validate_location(loc: str) -> str:
+    if not loc or not loc.strip():
+        return ''
+    loc = loc.strip()
+    # Reject if too long
+    if len(loc) > 60:
+        return ''
+    # Reject if contains digits (phone, zip, etc.)
+    if re.search(r'\d', loc):
+        return ''
+    # Reject if any word is a known tech/skill term
+    words = set(loc.lower().replace(',', ' ').split())
+    if words & _GARBAGE_WORDS:
+        return ''
+    # Must match City or City, State pattern
+    if not _LOCATION_RE.match(loc):
+        return ''
+    return loc
 
 # Single prompt evaluates one CV against ALL personas at once.
 # Previously this was P separate calls per CV — now it's 1.
@@ -124,7 +155,7 @@ def evaluate_candidate(cv: dict, personas: list) -> dict:
     try:
         response = invoke_llm(prompt)
         parsed = _parse_llm_json(response.content)
-        llm_location = parsed.get("location", "")
+        llm_location = _validate_location(parsed.get("location", ""))
         persona_results = parsed.get("results", [])
 
         for i, result in enumerate(persona_results):
