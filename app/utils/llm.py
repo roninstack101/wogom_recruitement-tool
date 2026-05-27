@@ -34,7 +34,8 @@ class _MultiProviderManager:
         for k, v in sorted(os.environ.items()):
             if k.startswith("GROQ_API_KEY") and v.strip():
                 self._providers.append(("groq", v.strip()))
-            elif k.startswith("GOOGLE_API_KEY") and v.strip():
+        for k, v in sorted(os.environ.items()):
+            if k.startswith("GOOGLE_API_KEY") and v.strip():
                 self._providers.append(("gemini", v.strip()))
 
         if not self._providers:
