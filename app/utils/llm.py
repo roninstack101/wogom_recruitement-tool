@@ -147,10 +147,11 @@ def invoke_llm(prompt: str):
                 new = _manager.rotate()
                 with _usage_lock:
                     _usage["retries"] += 1
-                print(f"[LLM] Rate limit on {provider} — switching to {new[0]} key ...{new[1][-6:]} (attempt {attempt + 1})")
+                print(f"[LLM] Retry #{_usage['retries']} — {provider} key ...{key[-6:]} failed: {str(e)[:120]} — switching to {new[0]} ...{new[1][-6:]} (attempt {attempt + 1})")
                 time.sleep(RETRY_DELAY)
                 last_error = e
             else:
+                print(f"[LLM] Non-retryable error on {provider} key ...{key[-6:]}: {e}")
                 raise
 
     raise RuntimeError(f"All {_manager.count} keys exhausted after retries. Last error: {last_error}")
