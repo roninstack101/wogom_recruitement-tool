@@ -32,7 +32,7 @@ router = APIRouter()
 
 _embedder = SentenceTransformer("all-MiniLM-L6-v2")
 SIMILARITY_THRESHOLD = 0.30
-MAX_EVAL_WORKERS = 5
+MAX_EVAL_WORKERS = 2
 
 # ─────────────────────────────────────────────
 # In-memory async job store

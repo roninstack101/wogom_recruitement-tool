@@ -8,9 +8,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 load_dotenv()
 
 GROQ_MODEL   = "llama-3.3-70b-versatile"
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemma-4-31b-it"
 MAX_RETRIES  = 3
-RETRY_DELAY  = 5
+RETRY_DELAY  = 15
 
 COST_PER_M = {
     "groq_input":    0.59,
