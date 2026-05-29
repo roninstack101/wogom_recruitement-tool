@@ -4,13 +4,15 @@ import threading
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-GROQ_MODEL   = "llama-3.3-70b-versatile"
-GEMINI_MODEL = "gemma-4-31b-it"
-MAX_RETRIES  = 3
-RETRY_DELAY  = 15
+GROQ_MODEL     = "llama-3.3-70b-versatile"
+GEMINI_MODEL   = "gemma-4-31b-it"
+DEEPSEEK_MODEL = "deepseek-v4-pro"
+MAX_RETRIES    = 3
+RETRY_DELAY    = 15
 
 COST_PER_M = {
     "groq_input":    0.59,
@@ -35,11 +37,14 @@ class _MultiProviderManager:
             if k.startswith("GROQ_API_KEY") and v.strip():
                 self._providers.append(("groq", v.strip()))
         for k, v in sorted(os.environ.items()):
+            if k.startswith("DEEPSEEK_API_KEY") and v.strip():
+                self._providers.append(("deepseek", v.strip()))
+        for k, v in sorted(os.environ.items()):
             if k.startswith("GOOGLE_API_KEY") and v.strip():
                 self._providers.append(("gemini", v.strip()))
 
         if not self._providers:
-            raise RuntimeError("No GROQ_API_KEY or GOOGLE_API_KEY found in environment")
+            raise RuntimeError("No GROQ_API_KEY, DEEPSEEK_API_KEY, or GOOGLE_API_KEY found in environment")
 
         self._index = 0
 
@@ -89,6 +94,8 @@ def get_llm():
     provider, key = _manager.current
     if provider == "groq":
         return ChatGroq(model=GROQ_MODEL, temperature=0.3, api_key=key)
+    elif provider == "deepseek":
+        return ChatOpenAI(model=DEEPSEEK_MODEL, temperature=0.3, api_key=key, base_url="https://api.deepseek.com")
     else:
         return ChatGoogleGenerativeAI(model=GEMINI_MODEL, temperature=0.3, google_api_key=key)
 
@@ -119,7 +126,7 @@ def invoke_llm(prompt: str):
                 continue
 
             # Record token usage
-            if provider == "groq":
+            if provider in ("groq", "deepseek"):
                 meta = response.response_metadata.get("token_usage", {})
                 inp = meta.get("prompt_tokens", 0)
                 out = meta.get("completion_tokens", 0)
