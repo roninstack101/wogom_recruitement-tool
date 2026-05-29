@@ -30,24 +30,30 @@ def _extract_resumes_from_files(resume_files: List[str]) -> List[Dict]:
                 for f in files:
                     if f.lower().endswith(SUPPORTED_EXT):
                         full_path = os.path.join(root, f)
-                        text = extract_text_from_file(full_path)
-                        if text.strip():
-                            extracted.append({
-                                "file": f,
-                                "path": full_path,
-                                "text": text
-                            })
+                        try:
+                            text = extract_text_from_file(full_path)
+                            if text.strip():
+                                extracted.append({
+                                    "file": f,
+                                    "path": full_path,
+                                    "text": text
+                                })
+                        except Exception as e:
+                            print(f"[PARSER] Skipping {f}: {e}")
 
         # ---------------- SINGLE FILE ----------------
         else:
             if path.lower().endswith(SUPPORTED_EXT):
-                text = extract_text_from_file(path)
-                if text.strip():
-                    extracted.append({
-                        "file": os.path.basename(path),
-                        "path": path,
-                        "text": text
-                    })
+                try:
+                    text = extract_text_from_file(path)
+                    if text.strip():
+                        extracted.append({
+                            "file": os.path.basename(path),
+                            "path": path,
+                            "text": text
+                        })
+                except Exception as e:
+                    print(f"[PARSER] Skipping {os.path.basename(path)}: {e}")
 
     return extracted
 
