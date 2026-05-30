@@ -10,7 +10,8 @@ load_dotenv()
 
 GROQ_MODEL     = "llama-3.3-70b-versatile"
 GEMINI_MODEL   = "gemma-4-31b-it"
-DEEPSEEK_MODEL = "deepseek-v4-pro"
+DEEPSEEK_MODEL       = "deepseek-v4-pro"
+DEEPSEEK_FLASH_MODEL = "deepseek-v4-flash"
 MAX_RETRIES    = 3
 RETRY_DELAY    = 15
 
@@ -88,6 +89,22 @@ def get_usage() -> dict:
 def reset_usage() -> None:
     with _usage_lock:
         _usage.update({"input": 0, "output": 0, "calls": 0, "retries": 0})
+
+
+def invoke_deepseek(prompt: str) -> str:
+    """Use DeepSeek exclusively. Returns response text or empty string on failure."""
+    deepseek_keys = [v for p, v in _manager._providers if p == "deepseek"]
+    if not deepseek_keys:
+        return ""
+    for key in deepseek_keys:
+        try:
+            llm = ChatOpenAI(model=DEEPSEEK_FLASH_MODEL, temperature=0.0, api_key=key,
+                             base_url="https://api.deepseek.com", timeout=30)
+            response = llm.invoke(prompt)
+            return response.content if hasattr(response, "content") else str(response)
+        except Exception as e:
+            print(f"[DEEPSEEK] Location extraction failed: {e}")
+    return ""
 
 
 def get_llm():
