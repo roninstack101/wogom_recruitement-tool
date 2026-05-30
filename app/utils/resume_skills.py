@@ -1,6 +1,6 @@
 import json
 from typing import Dict, List
-from app.utils.llm import invoke_llm, invoke_deepseek
+from app.utils.llm import invoke_llm
 
 
 SKILL_EXTRACTION_PROMPT = """
@@ -61,23 +61,6 @@ def extract_skills_llm(
         }
 
     return skills
-
-
-def extract_location_llm(text: str) -> str:
-    """Extract location using DeepSeek on the CV header. Falls back to regex."""
-    header = text[:600]
-    prompt = (
-        "Extract the candidate's current city and state/country from the resume header below.\n"
-        "Return ONLY the location as plain text e.g. 'Mumbai, Maharashtra' or 'Ahmedabad, Gujarat'.\n"
-        "If no city/address is present in the header, return exactly: ''\n"
-        "Do NOT guess. Do NOT return skills, technologies, or company names.\n\n"
-        f"RESUME HEADER:\n{header}\n\nLOCATION:"
-    )
-    result = invoke_deepseek(prompt).strip().strip('"').strip("'")
-    # Validate: reject if too long, has digits, or looks like garbage
-    if result and len(result) < 60 and not any(c.isdigit() for c in result):
-        return result
-    return extract_location(text)
 
 
 def extract_location(text: str) -> str:

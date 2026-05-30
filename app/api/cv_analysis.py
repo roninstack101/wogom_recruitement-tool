@@ -19,7 +19,7 @@ from app.agents.persona_builder import build_personas
 from app.agents.cv_evaluator import evaluate_candidate
 from app.agents.candidate_ranker import rank_candidates
 from app.agents.resume_parser import _extract_resumes_from_files
-from app.utils.resume_skills import extract_section, extract_location_llm
+from app.utils.resume_skills import extract_section, extract_location
 from app.api.auth import get_current_user
 from app.db.database import get_db, SessionLocal
 from app.db.models import (
@@ -77,7 +77,7 @@ def _parse_resume(r: dict) -> dict:
         "projects": extract_section(text, ["projects", "key projects"]),
         "raw_text": text,
         "resume_path": r["path"],
-        "location": extract_location_llm(text),
+        "location": extract_location(text),
     }
 
 
