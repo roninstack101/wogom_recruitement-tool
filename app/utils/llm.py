@@ -93,9 +93,9 @@ def reset_usage() -> None:
 def get_llm():
     provider, key = _manager.current
     if provider == "groq":
-        return ChatGroq(model=GROQ_MODEL, temperature=0.3, api_key=key)
+        return ChatGroq(model=GROQ_MODEL, temperature=0.3, api_key=key, timeout=60)
     elif provider == "deepseek":
-        return ChatOpenAI(model=DEEPSEEK_MODEL, temperature=0.3, api_key=key, base_url="https://api.deepseek.com")
+        return ChatOpenAI(model=DEEPSEEK_MODEL, temperature=0.3, api_key=key, base_url="https://api.deepseek.com", timeout=60)
     else:
         return ChatGoogleGenerativeAI(model=GEMINI_MODEL, temperature=0.3, google_api_key=key)
 
