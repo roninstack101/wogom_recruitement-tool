@@ -63,13 +63,26 @@ def extract_skills_llm(
     return skills
 
 
+_STATES = {
+    'maharashtra', 'gujarat', 'karnataka', 'tamil nadu', 'rajasthan',
+    'uttar pradesh', 'delhi', 'new delhi', 'punjab', 'haryana',
+    'west bengal', 'telangana', 'andhra pradesh', 'kerala', 'madhya pradesh',
+    'bihar', 'odisha', 'assam', 'jharkhand', 'uttarakhand', 'himachal pradesh',
+    'goa', 'chhattisgarh', 'chandigarh', 'jammu', 'kashmir',
+}
+_COUNTRIES = {
+    'india', 'usa', 'us', 'uk', 'united states', 'united kingdom',
+    'canada', 'australia', 'uae', 'singapore', 'germany', 'france',
+}
+_KNOWN = _STATES | _COUNTRIES
+
+
 def extract_location(text: str) -> str:
     """Extract candidate location from resume text using regex — no LLM call."""
     import re
     lines = text.splitlines()
-    skip = {'university', 'college', 'institute', 'company', 'corporation', 'ltd', 'inc', 'pvt', 'school'}
 
-    # Pass 1: explicit label anywhere in first 30 lines
+    # Pass 1: explicit label in first 30 lines
     label_re = re.compile(
         r'(?:location|address|city|based\s+in|residing\s+in)[:\s]+([^\n|•]+)',
         re.IGNORECASE,
@@ -78,27 +91,32 @@ def extract_location(text: str) -> str:
         m = label_re.search(line.strip())
         if m:
             val = m.group(1).strip().rstrip('|•–-,').strip()
-            if val and len(val) < 80:
+            if val and len(val) < 80 and not re.search(r'\d{4,}', val):
                 return val
 
-    # Pass 2: "City, State/Country" pattern anywhere within a line (handles pipe-separated headers)
-    city_re = re.compile(r'([A-Za-z][A-Za-z\s\-]{1,25}),\s*([A-Za-z][A-Za-z\s\-]{1,25})')
+    # Pass 2: look for "City, State/Country" where State/Country is a known place
+    city_re = re.compile(r'([A-Za-z][A-Za-z\s\-]{1,25}),\s*([A-Za-z][A-Za-z\s\-]{1,30})')
     for line in lines[:25]:
-        line = line.strip()
-        if not line or any(w in line.lower() for w in skip):
+        if not line.strip() or '@' in line:
             continue
-        # Split on common separators to isolate segments
-        segments = re.split(r'[|•\-–/]', line)
+        segments = re.split(r'[|•–/]', line)
         for seg in segments:
             seg = seg.strip()
-            m = city_re.fullmatch(seg) or city_re.match(seg)
+            if not seg or re.search(r'\d', seg):
+                continue
+            m = city_re.search(seg)
             if m:
-                # Reject if segment looks like a name or email
-                if '@' in seg or re.search(r'\d', seg):
-                    continue
-                return seg.strip()
+                state_or_country = m.group(2).strip().lower()
+                if state_or_country in _KNOWN:
+                    return f"{m.group(1).strip()}, {m.group(2).strip()}"
 
-    # Pass 3: look for "Remote" anywhere in first 30 lines
+    # Pass 3: just a known state/country name on its own in first 20 lines
+    for line in lines[:20]:
+        clean = line.strip().lower()
+        if clean in _KNOWN:
+            return line.strip()
+
+    # Pass 4: Remote
     for line in lines[:30]:
         if re.search(r'\bremote\b', line, re.IGNORECASE):
             return 'Remote'
