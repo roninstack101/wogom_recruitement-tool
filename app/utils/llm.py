@@ -105,7 +105,13 @@ def invoke_gemini_location(prompt: str) -> str:
                 model=GEMINI_FLASH_LITE_MODEL, temperature=0.0, google_api_key=key
             )
             response = llm.invoke(prompt)
-            return response.content if hasattr(response, "content") else str(response)
+            content = response.content if hasattr(response, "content") else str(response)
+            if isinstance(content, list):
+                content = " ".join(
+                    p.get("text", str(p)) if isinstance(p, dict) else str(p)
+                    for p in content
+                )
+            return str(content)
         except Exception as e:
             print(f"[GEMINI_LOCATION] Failed: {e}")
     return ""
