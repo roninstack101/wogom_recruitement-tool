@@ -2,6 +2,7 @@
 # Agent 7: CV Evaluator — optimized batch version
 
 import json
+import re
 from app.utils.llm import invoke_llm
 
 # Single prompt evaluates one CV against ALL personas at once.
@@ -57,15 +58,36 @@ def _parse_llm_json(content) -> list:
             for part in content
         )
     content = content.strip()
+
+    # Strip markdown code fences
     if content.startswith("```"):
         content = content.split("```")[1]
         if content.startswith("json"):
             content = content[4:]
         content = content.strip()
-    parsed = json.loads(content)
-    if isinstance(parsed, dict) and "results" in parsed:
-        return parsed["results"]
-    return parsed
+
+    # Try direct parse first
+    try:
+        parsed = json.loads(content)
+        if isinstance(parsed, dict) and "results" in parsed:
+            return parsed["results"]
+        return parsed
+    except json.JSONDecodeError:
+        pass
+
+    # Fallback: extract first JSON array or object from anywhere in the response
+    for pattern in (r'\[.*\]', r'\{.*\}'):
+        m = re.search(pattern, content, re.DOTALL)
+        if m:
+            try:
+                parsed = json.loads(m.group())
+                if isinstance(parsed, dict) and "results" in parsed:
+                    return parsed["results"]
+                return parsed
+            except json.JSONDecodeError:
+                continue
+
+    raise ValueError(f"Could not extract JSON from response: {content[:200]}")
 
 
 def _compute_grade(score: int) -> str:

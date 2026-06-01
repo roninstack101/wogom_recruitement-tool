@@ -7,7 +7,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 load_dotenv()
 
-GROQ_MODEL   = "llama-3.3-70b-versatile"
+GROQ_MODEL   = "meta-llama/llama-4-scout-17b-16e-instruct"
 GEMINI_MODEL = "gemma-4-31b-it"
 MAX_RETRIES  = 3
 RETRY_DELAY  = 15

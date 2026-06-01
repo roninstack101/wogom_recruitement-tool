@@ -435,6 +435,11 @@ def _run_pipeline_background(eval_job_id: str, tmp_path: str, profile_str: str, 
             _set_job(eval_job_id, status="failed", error="No valid resumes found in the uploaded file.")
             return
 
+        CV_LIMIT = 40
+        if len(raw_resumes) > CV_LIMIT:
+            _set_job(eval_job_id, status="failed", error=f"Upload contains {len(raw_resumes)} CVs. Maximum allowed is {CV_LIMIT}. Please split into smaller batches.")
+            return
+
         total = len(raw_resumes)
         _set_job(eval_job_id, message=f"Parsing {total} resumes…")
         parsed_resumes = _parse_resumes_parallel(raw_resumes)

@@ -446,6 +446,9 @@ export default function CandidatePage() {
                         Upload a ZIP file containing resumes, or a single PDF/DOCX file.
                         Each will be evaluated against the {personas.length} persona(s) generated above.
                     </p>
+                    <div className="alert alert-warning mb-md" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <AlertTriangle size={14} /> Maximum <strong>40 CVs</strong> per upload. Split larger batches into multiple uploads.
+                    </div>
 
                     <div style={{ maxWidth: 400 }}>
                         <label className="text-sm font-semibold mb-xs" style={{ display: 'block' }}>
