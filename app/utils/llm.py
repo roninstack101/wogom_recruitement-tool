@@ -7,8 +7,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 load_dotenv()
 
-GROQ_MODEL   = "meta-llama/llama-4-scout-17b-16e-instruct"
-GEMINI_MODEL = "gemma-4-31b-it"
+GROQ_MODEL              = "meta-llama/llama-4-scout-17b-16e-instruct"
+GEMINI_MODEL            = "gemma-4-31b-it"
+GEMINI_FLASH_LITE_MODEL = "gemini-3.1-flash-lite"
 MAX_RETRIES  = 3
 RETRY_DELAY  = 15
 
@@ -91,6 +92,23 @@ def get_llm():
         return ChatGroq(model=GROQ_MODEL, temperature=0.3, api_key=key)
     else:
         return ChatGoogleGenerativeAI(model=GEMINI_MODEL, temperature=0.3, google_api_key=key)
+
+
+def invoke_gemini_location(prompt: str) -> str:
+    """Use Gemini Flash Lite exclusively for location extraction. Returns text or empty string."""
+    gemini_keys = [v for p, v in _manager._providers if p == "gemini"]
+    if not gemini_keys:
+        return ""
+    for key in gemini_keys:
+        try:
+            llm = ChatGoogleGenerativeAI(
+                model=GEMINI_FLASH_LITE_MODEL, temperature=0.0, google_api_key=key
+            )
+            response = llm.invoke(prompt)
+            return response.content if hasattr(response, "content") else str(response)
+        except Exception as e:
+            print(f"[GEMINI_LOCATION] Failed: {e}")
+    return ""
 
 
 def invoke_llm(prompt: str):

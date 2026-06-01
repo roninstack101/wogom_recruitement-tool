@@ -1,6 +1,6 @@
 import json
 from typing import Dict, List
-from app.utils.llm import invoke_llm
+from app.utils.llm import invoke_llm, invoke_gemini_location
 
 
 SKILL_EXTRACTION_PROMPT = """
@@ -75,6 +75,22 @@ _COUNTRIES = {
     'canada', 'australia', 'uae', 'singapore', 'germany', 'france',
 }
 _KNOWN = _STATES | _COUNTRIES
+
+
+def extract_location_llm(text: str) -> str:
+    """Extract location using Gemini Flash Lite on the CV header. Falls back to regex."""
+    header = text[:600]
+    prompt = (
+        "Extract the candidate's current city and state/country from the resume header below.\n"
+        "Return ONLY the location as plain text e.g. 'Mumbai, Maharashtra' or 'Surat, Gujarat'.\n"
+        "If no city/address is clearly present, return exactly empty string: ''\n"
+        "Do NOT guess. Do NOT return skills, technologies, or company names.\n\n"
+        f"RESUME HEADER:\n{header}\n\nLOCATION:"
+    )
+    result = invoke_gemini_location(prompt).strip().strip('"').strip("'")
+    if result and len(result) < 60 and not any(c.isdigit() for c in result):
+        return result
+    return extract_location(text)
 
 
 def extract_location(text: str) -> str:
