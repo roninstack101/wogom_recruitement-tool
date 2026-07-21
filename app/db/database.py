@@ -11,9 +11,16 @@ try:
 except ImportError:
     pass
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:wogom@localhost:5432/recruitment_ai",
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "1433")
+DB_USER = os.getenv("DB_USER", "sa")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "wogom")
+DB_NAME = os.getenv("DB_NAME", "recruitment_ai")
+DB_DRIVER = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
+
+DATABASE_URL = (
+    f"mssql+pyodbc://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    f"?driver={DB_DRIVER.replace(' ', '+')}"
 )
 
 engine = create_engine(

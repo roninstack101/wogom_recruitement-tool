@@ -25,6 +25,9 @@ faiss-cpu
 pdfplumber
 python-docx
 
+# Database driver
+pyodbc
+
 # Environment variables
 python-dotenv
 reportlab
