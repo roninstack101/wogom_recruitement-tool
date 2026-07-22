@@ -15,6 +15,7 @@ env/
 # ── Environment / Secrets ──
 .env
 .env.*
+!.env.example
 .streamlit/.secrets
 .streamlit/secrets.toml
 
