@@ -2,6 +2,7 @@
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from urllib.parse import quote_plus
 import os
 
 # Load .env if present
@@ -19,8 +20,9 @@ DB_NAME = os.getenv("DB_NAME", "recruitment_ai")
 DB_DRIVER = os.getenv("DB_DRIVER", "ODBC Driver 17 for SQL Server")
 
 DATABASE_URL = (
-    f"mssql+pyodbc://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    f"?driver={DB_DRIVER.replace(' ', '+')}"
+    f"mssql+pyodbc://{quote_plus(DB_USER)}:{quote_plus(DB_PASSWORD)}"
+    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    f"?driver={DB_DRIVER.replace(' ', '+')}&TrustServerCertificate=yes"
 )
 
 engine = create_engine(

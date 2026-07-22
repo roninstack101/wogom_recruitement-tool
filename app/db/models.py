@@ -102,7 +102,7 @@ def _utc_now():
 # ── 1. Users ───────────────────────────────────────────
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "recruitment_users"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(120), nullable=False)
@@ -122,11 +122,11 @@ class User(Base):
 # ── 2. Job Requests ───────────────────────────────────
 
 class JobRequest(Base):
-    __tablename__ = "job_requests"
+    __tablename__ = "recruitment_job_requests"
 
     id = Column(Integer, primary_key=True, index=True)
-    creator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    assigned_hr_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    creator_id = Column(Integer, ForeignKey("recruitment_users.id"), nullable=False)
+    assigned_hr_id = Column(Integer, ForeignKey("recruitment_users.id"), nullable=True)
 
     role_title = Column(String(255), nullable=False)
     jd_text = Column(Text, nullable=True)
@@ -144,7 +144,7 @@ class JobRequest(Base):
     rejection_reason = Column(Text, nullable=True)
 
     jd_source = Column(SAEnum(JDSource), nullable=True)
-    linked_jd_id = Column(Integer, ForeignKey("job_requests.id"), nullable=True)
+    linked_jd_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), nullable=True)
 
     # Legacy field — keep for backward compat during migration
     profile_json = Column(Text, nullable=True)
@@ -164,10 +164,10 @@ class JobRequest(Base):
 # ── 3. Job Profiles (AI-generated candidate profile) ──
 
 class JobProfile(Base):
-    __tablename__ = "job_profiles"
+    __tablename__ = "recruitment_job_profiles"
 
     id = Column(Integer, primary_key=True, index=True)
-    job_id = Column(Integer, ForeignKey("job_requests.id"), unique=True, nullable=False)
+    job_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), unique=True, nullable=False)
 
     ideal_candidate_summary = Column(Text, nullable=True)
     required_skills = Column(JSON, nullable=True)     # ["Python", "ML", ...]
@@ -188,10 +188,10 @@ class JobProfile(Base):
 # ── 4. Personas (5 AI-generated evaluation personas) ──
 
 class Persona(Base):
-    __tablename__ = "personas"
+    __tablename__ = "recruitment_personas"
 
     id = Column(Integer, primary_key=True, index=True)
-    profile_id = Column(Integer, ForeignKey("job_profiles.id"), nullable=False)
+    profile_id = Column(Integer, ForeignKey("recruitment_job_profiles.id"), nullable=False)
 
     persona_name = Column(String(120), nullable=False)
     description = Column(Text, nullable=True)
@@ -207,10 +207,10 @@ class Persona(Base):
 # ── 5. Candidates ─────────────────────────────────────
 
 class Candidate(Base):
-    __tablename__ = "candidates"
+    __tablename__ = "recruitment_candidates"
 
     id = Column(Integer, primary_key=True, index=True)
-    job_id = Column(Integer, ForeignKey("job_requests.id"), nullable=False)
+    job_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), nullable=False)
 
     name = Column(String(200), nullable=False)
     email = Column(String(255), nullable=True)
@@ -237,11 +237,11 @@ class Candidate(Base):
 # ── 7. Candidate Evaluations ──────────────────────────
 
 class CandidateEvaluation(Base):
-    __tablename__ = "candidate_evaluations"
+    __tablename__ = "recruitment_candidate_evaluations"
 
     id = Column(Integer, primary_key=True, index=True)
-    candidate_id = Column(Integer, ForeignKey("candidates.id"), unique=True, nullable=False)
-    job_id = Column(Integer, ForeignKey("job_requests.id"), nullable=False)
+    candidate_id = Column(Integer, ForeignKey("recruitment_candidates.id"), unique=True, nullable=False)
+    job_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), nullable=False)
 
     overall_score = Column(Float, nullable=True)
     grade = Column(String(5), nullable=True)
@@ -264,11 +264,11 @@ class CandidateEvaluation(Base):
 # ── 8. Chatbot Sessions (WhatsApp) ────────────────────
 
 class ChatbotSession(Base):
-    __tablename__ = "chatbot_sessions"
+    __tablename__ = "recruitment_chatbot_sessions"
 
     id = Column(Integer, primary_key=True, index=True)
-    candidate_id = Column(Integer, ForeignKey("candidates.id"), nullable=False)
-    job_id = Column(Integer, ForeignKey("job_requests.id"), nullable=False)
+    candidate_id = Column(Integer, ForeignKey("recruitment_candidates.id"), nullable=False)
+    job_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), nullable=False)
 
     status = Column(SAEnum(ChatbotStatus), default=ChatbotStatus.pending)
     questions_asked = Column(JSON, nullable=True)     # [{"q": "...", "expected": "...", "actual": "..."}]
@@ -286,11 +286,11 @@ class ChatbotSession(Base):
 # ── 9. Interview Slots ────────────────────────────────
 
 class InterviewSlot(Base):
-    __tablename__ = "interview_slots"
+    __tablename__ = "recruitment_interview_slots"
 
     id = Column(Integer, primary_key=True, index=True)
-    candidate_id = Column(Integer, ForeignKey("candidates.id"), nullable=False)
-    job_id = Column(Integer, ForeignKey("job_requests.id"), nullable=False)
+    candidate_id = Column(Integer, ForeignKey("recruitment_candidates.id"), nullable=False)
+    job_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), nullable=False)
 
     scheduled_at = Column(DateTime, nullable=False)
     duration_minutes = Column(Integer, default=60)
@@ -310,15 +310,15 @@ class InterviewSlot(Base):
 # ── 10. Pipeline Stage Logs (Audit trail) ─────────────
 
 class PipelineStageLog(Base):
-    __tablename__ = "pipeline_stage_logs"
+    __tablename__ = "recruitment_pipeline_stage_logs"
 
     id = Column(Integer, primary_key=True, index=True)
-    candidate_id = Column(Integer, ForeignKey("candidates.id"), nullable=False)
-    job_id = Column(Integer, ForeignKey("job_requests.id"), nullable=False)
+    candidate_id = Column(Integer, ForeignKey("recruitment_candidates.id"), nullable=False)
+    job_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), nullable=False)
 
     from_stage = Column(String(50), nullable=True)
     to_stage = Column(String(50), nullable=False)
-    changed_by = Column(Integer, ForeignKey("users.id"), nullable=True)  # NULL = automated
+    changed_by = Column(Integer, ForeignKey("recruitment_users.id"), nullable=True)  # NULL = automated
     reason = Column(Text, nullable=True)
     changed_at = Column(DateTime, default=_utc_now)
 
@@ -331,15 +331,15 @@ class PipelineStageLog(Base):
 # ── 11. Notifications ─────────────────────────────────
 
 class Notification(Base):
-    __tablename__ = "notifications"
+    __tablename__ = "recruitment_notifications"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("recruitment_users.id"), nullable=False)
     message = Column(Text, nullable=False)
     type = Column(SAEnum(NotificationType), default=NotificationType.general)
     is_read = Column(Boolean, default=False)
-    related_job_id = Column(Integer, ForeignKey("job_requests.id"), nullable=True)
-    related_candidate_id = Column(Integer, ForeignKey("candidates.id"), nullable=True)
+    related_job_id = Column(Integer, ForeignKey("recruitment_job_requests.id"), nullable=True)
+    related_candidate_id = Column(Integer, ForeignKey("recruitment_candidates.id"), nullable=True)
     created_at = Column(DateTime, default=_utc_now)
 
     # relationships
@@ -351,7 +351,7 @@ class Notification(Base):
 # ── 12. JD Form Data (saved intake forms for JD generation) ──
 
 class JDFormData(Base):
-    __tablename__ = "jd_form_data"
+    __tablename__ = "recruitment_jd_form_data"
 
     id = Column(Integer, primary_key=True, index=True)
     role = Column(String(255), nullable=False)
